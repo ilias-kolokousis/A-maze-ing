@@ -67,8 +67,40 @@ def set_42_coordinates(width: int, height: int):
             coord_str += f"{coord_list[x]}:"
         else:
             coord_str += coord_list[x]
-    print(coord_str)
-    return coord_str
+
+    x = [coord_list, coord_str]
+    print(x)
+    return x
+
+
+def get_entry(width: int, height: int, coords_42: list):
+    while True:
+        entry = str(
+            f"{random.randrange(1, width)},{random.randrange(1, height)}"
+        )
+        found_same = False
+        for coord in coords_42:
+            if coord == entry:
+                found_same = True
+                break
+        if found_same:
+            continue
+        return entry
+
+
+def get_exit(width: int, height: int, coords_42: list, entry: str):
+    while True:
+        exit = str(
+            f"{random.randrange(1, width)},{random.randrange(1, height)}"
+        )
+        found_same = False
+        for coord in coords_42:
+            if coord == exit or exit == entry:
+                found_same = True
+                break
+        if found_same:
+            continue
+        return exit
 
 
 def generate_seed_config(seed: int):
@@ -76,9 +108,17 @@ def generate_seed_config(seed: int):
     random.seed(seed)
     width = random.randrange(4, 40)
     height = random.randrange(4, width)
-    coord_42 = set_42_coordinates(width, height)
-    entry = str(f"{random.randrange(1, width)},{random.randrange(1, height)}")
-    exit = str(f"{random.randrange(1, width)},{random.randrange(1, height)}")
+
+    coords = set_42_coordinates(width, height)
+    if coords is None:
+        coord_42 = ""
+        coords_list = []
+    else:
+        coords_list = coords[0]
+        coord_42 = coords[1]
+
+    entry = get_entry(width, height, coords_list)
+    exit = get_exit(width, height, coords_list, entry)
     perfect = random.choice([True, False])
     output = "maze.txt"
 

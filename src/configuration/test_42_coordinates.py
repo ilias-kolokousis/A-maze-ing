@@ -1,3 +1,6 @@
+import random
+
+
 def plot_42(left: int, top: int):
     x = 1
     y = 0
@@ -60,11 +63,48 @@ def set_42_coordinates(width: int, height: int):
             coord_str += f"{coord_list[x]}:"
         else:
             coord_str += coord_list[x]
-    print(coord_str)
+    print(coord_list)
+    return [coord_list, coord_str]
+
+
+def get_entry(width: int, height: int, coords_42: list):
+    while True:
+        entry = str(
+            f"{random.randrange(1, width)},{random.randrange(1, height)}"
+        )
+        found_same = False
+        print(entry)
+        for coord in coords_42:
+            if coord == entry:
+                found_same = True
+                break
+        if found_same:
+            continue
+        return entry
+
+
+def get_exit(width: int, height: int, coords_42: list, entry: str):
+    while True:
+        exit = str(
+            f"{random.randrange(1, width)},{random.randrange(1, height)}"
+        )
+        found_same = False
+        print(exit)
+        for coord in coords_42:
+            if coord == exit or exit == entry:
+                found_same = True
+                break
+        if found_same:
+            continue
+        return exit
 
 
 def main():
-    set_42_coordinates(9, 7)
+    coords = set_42_coordinates(9, 7)[0]
+    entry = get_entry(9, 7, coords)
+    print(f"Entry: {entry}")
+    exit = get_exit(9, 7, coords, entry)
+    print(f"Exit: {exit}")
 
 
 if __name__ == "__main__":
