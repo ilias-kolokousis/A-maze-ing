@@ -13,8 +13,10 @@ def get_x_y(width: int, height: int) -> tuple[int]:
     return (x, y)
 
 
+config_filepath: str = 'test_config.ini'
+
 config: ConfigParser = ConfigParser()
-file: list = config.read('test_config.ini')
+file: list = config.read(config_filepath)
 width: int = config.getint('DEFAULT', 'width')
 height: int = config.getint('DEFAULT', 'height')
 start: tuple[int] = get_x_y(width - 1, height - 1)
@@ -30,7 +32,7 @@ def grid_init(width: int, height: int) -> list[list[int]]:
 
 
 grid: list[list[int]] = grid_init(width, height)
-visited: list[tuple] = [start]
+visited: set[tuple] = {start}
 
 change_bit: dict = {'W': lambda x: x & ~(1 << 3),
                     'E': lambda x: x & ~(1 << 1),
@@ -41,40 +43,11 @@ change_direction: dict = {'N': 'S', 'S': 'N', 'E': 'W', 'W': 'E'}
 
 
 def produce_neighbors(start: tuple, width: int, height: int) -> list[tuple]:
-    if start[0] == 0 and start[1] == 0:
-        neighbors: list[tuple] = [(start[0]+1, start[1]),
-                                  (start[0], start[1]+1)]
-    elif start[0] == 0 and start[1] == height - 1:
-        neighbors: list[tuple] = [(start[0], start[1]-1),
-                                  (start[0]+1, start[1])]
-    elif start[0] == width - 1 and start[1] == 0:
-        neighbors: list[tuple] = [(start[0]-1, start[1]),
-                                  (start[0], start[1]+1)]
-    elif start[0] == 0:
-        neighbors: list[tuple] = [(start[0], start[1]-1),
-                                  (start[0]+1, start[1]),
-                                  (start[0], start[1]+1)]
-    elif start[1] == 0:
-        neighbors: list[tuple] = [(start[0]-1, start[1]),
-                                  (start[0]+1, start[1]),
-                                  (start[0], start[1]+1)]
-    elif start[0] == width - 1 and start[1] == height - 1:
-        neighbors: list[tuple] = [(start[0]-1, start[1]),
-                                  (start[0], start[1]-1)]
-    elif start[0] == width - 1:
-        neighbors: list[tuple] = [(start[0]-1, start[1]),
-                                  (start[0], start[1]-1),
-                                  (start[0], start[1]+1)]
-    elif start[1] == height - 1:
-        neighbors: list[tuple] = [(start[0]-1, start[1]),
-                                  (start[0], start[1]-1),
-                                  (start[0]+1, start[1])]
-    else:
-        neighbors: list[tuple] = [(start[0]-1, start[1]),
-                                  (start[0], start[1]-1),
-                                  (start[0]+1, start[1]),
-                                  (start[0], start[1]+1)]
-    return neighbors
+    x: int = start[0]
+    y: int = start[1]
+    candidates = [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]
+    return [(nx, ny) for nx, ny in candidates 
+            if nx >= 0 and nx < width and ny >= 0 and ny < height]
 
 
 def carve_wall(grid: list[list], start: tuple[int],
@@ -83,17 +56,10 @@ def carve_wall(grid: list[list], start: tuple[int],
         dir: str = 'W' if start[0] - 1 == next_n[0] else 'E'
     elif start[1] != next_n[1]:
         dir: str = 'N' if start[1] - 1 == next_n[1] else 'S'
-    # print(start, next_n)
-    # print(f"before:\t{bin(grid[start[1]][start[0]])}")
 
     grid[start[1]][start[0]] = change_bit[dir](grid[start[1]][start[0]])
-
-    # print(f"after:\t{bin(grid[start[1]][start[0]])}\n")
-
     dir = change_direction[dir]
-    # print(f"before:\t{bin(grid[next_n[1]][next_n[0]])}")
     grid[next_n[1]][next_n[0]] = change_bit[dir](grid[next_n[1]][next_n[0]])
-    # print(f"after:\t{bin(grid[next_n[1]][next_n[0]])}\n")
     return [grid, start]
 
 
@@ -116,7 +82,7 @@ def hunt(grid: list[list], start: tuple[int]) -> list[list]:
     next_n: tuple[int] = random.choice(neighbors)
     while next_n not in visited:
         next_n = random.choice(neighbors)
-    visited.append(start)
+    visited.add(start)
     return carve_wall(grid, start, next_n)
 
 
@@ -129,20 +95,17 @@ def kill(grid: list[list], start: tuple) -> list:
         next_n = random.choice(neighbors)
     res: list = carve_wall(grid, start, next_n)
     start = next_n
-    visited.append(next_n)
+    visited.add(next_n)
     return [res[0], start]
 
 
-cell_found: bool = False
 while len(visited) < width * height:
     neighbors: list[tuple] = produce_neighbors(start, width, height)
 
-    cell_found = False
     if all(n in visited for n in neighbors):
         res: list = hunt(grid, start)
         grid = res[0]
         start = res[1]
-        cell_found = True
 
     res: list = kill(grid, start)
     grid = res[0]
@@ -158,4 +121,3 @@ if __name__ == "__main__":
         output += ''.join(row) + '\n'
     with open('output.txt', 'w') as f:
         f.write(output)
-    # print(grid)
