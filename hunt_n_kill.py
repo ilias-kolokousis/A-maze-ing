@@ -46,7 +46,7 @@ def produce_neighbors(start: tuple, width: int, height: int) -> list[tuple]:
     x: int = start[0]
     y: int = start[1]
     candidates = [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]
-    return [(nx, ny) for nx, ny in candidates 
+    return [(nx, ny) for nx, ny in candidates
             if nx >= 0 and nx < width and ny >= 0 and ny < height]
 
 
