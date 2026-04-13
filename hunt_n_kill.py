@@ -17,8 +17,8 @@ config_filepath: str = 'test_config.ini'
 
 config: ConfigParser = ConfigParser()
 file: list = config.read(config_filepath)
-width: int = config.getint('DEFAULT', 'width')
-height: int = config.getint('DEFAULT', 'height')
+width: int = config.getint('size', 'width')
+height: int = config.getint('size', 'height')
 start: tuple[int] = get_x_y(width - 1, height - 1)
 
 
@@ -91,8 +91,9 @@ def kill(grid: list[list], start: tuple) -> list:
     next_n: tuple[int] = random.choice(neighbors)
     if all(n in visited for n in neighbors):
         return [grid, start]
-    while next_n in visited:
-        next_n = random.choice(neighbors)
+    if random.choices([False, True], weights=(50, 50), k=1)[0]:
+        while next_n in visited:
+            next_n = random.choice(neighbors)
     res: list = carve_wall(grid, start, next_n)
     start = next_n
     visited.add(next_n)
@@ -110,6 +111,61 @@ while len(visited) < width * height:
     res: list = kill(grid, start)
     grid = res[0]
     start = res[1]
+
+
+def is_blocked(neighbor: tuple, grid: list[list]) -> bool:
+    return neighbor[0] == '█' or neighbor[1] == '█'
+
+
+def solve_maze(grid: list[list], start: tuple, end: tuple) -> list[tuple]:
+    open: list = [[start, {
+                   'g': 0,
+                   'h': abs(end[0] - start[0]) + abs(end[1] - start[1]),
+                   'f': abs(end[0] - start[0]) + abs(end[1] - start[1]),
+                   'parent': None}
+                   ]]
+    closed: list = []
+
+    while 1 == 1:
+        lowest_f_node: list = open[0]
+        for node in open:
+            if node[1]['f'] < lowest_f_node[1]['f']:
+                lowest_f_node = node
+
+        closed.append(lowest_f_node)
+        open.remove(lowest_f_node)
+        current: tuple = lowest_f_node[0]
+        if current == end:
+            break
+        prob_neigh: list = produce_neighbors(current, len(grid[0]), len(grid))
+        neighbors: list = []
+        for n in prob_neigh:
+            if n not in closed or not is_blocked(n, grid):
+                neighbors.append(n)
+
+        for n in neighbors:
+            tent_g: int = lowest_f_node[1]['g'] + 1
+            nodes: list[tuple] = [i[0] for i in open]
+            node: list = [n, {
+                            'g': tent_g,
+                            'h': (abs(end[0] - current[0])
+                                  + abs(end[1] - current[1])),
+                            'f': node[1]['h'] + node[1]['g'],
+                            'parent': current
+                            }]
+            if n not in nodes:
+                open.append(node)
+            else:
+                if tent_g < open[nodes.index(n)][1]['g']:
+                    open[nodes.index(n)].remove(open[nodes.index(n)][1])
+                    open[nodes.index(n)].append(node[1])
+
+    path: list[tuple] = [current]
+    while path[-1] != start:
+        path.append(lowest_f_node[1]['parent'])
+        lowest_f_node = [i for i in closed
+                         if i[0] == lowest_f_node[1]['parent']]
+    return path
 
 
 if __name__ == "__main__":
