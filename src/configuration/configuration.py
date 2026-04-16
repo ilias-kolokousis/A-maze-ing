@@ -69,7 +69,6 @@ def set_42_coordinates(width: int, height: int):
             coord_str += coord_list[x]
 
     x = [coord_list, coord_str]
-    print(x)
     return x
 
 
@@ -175,3 +174,12 @@ def generate_random_config():
             generate_random_config()
         else:
             exit()
+
+
+def main():
+    x = set_42_coordinates(20, 20)
+    print(x[0], x[1])
+
+
+if __name__ == "__main__":
+    main()
