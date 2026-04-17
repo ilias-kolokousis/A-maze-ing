@@ -38,7 +38,7 @@ change_bit: dict = {'W': lambda x: x & ~(1 << 3),
 change_direction: dict = {'N': 'S', 'S': 'N', 'E': 'W', 'W': 'E'}
 
 
-def produce_neighbors(start: tuple, widht: int, height: int) -> list[tuple]:
+def produce_neighbors(start: tuple, width: int, height: int) -> list[tuple]:
     x: int = start[0]
     y: int = start[1]
     candidates = [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]
