@@ -1,9 +1,6 @@
 import configparser
 import random
 
-# 42 is 7x5!
-# def set_entry(width: int, height: int):
-
 
 def plot_42(left: int, top: int):
     x = 1
@@ -11,31 +8,31 @@ def plot_42(left: int, top: int):
     coords = []
     while x < 8:
         if x == 1 or 5 <= x <= 7:
-            coords += [f"{x + left},{top - y}"]
+            coords += [(x + left, top - y)]
         x += 1
     x = 1
     y += 1
     while x < 8:
         if x == 1 or x == 7:
-            coords += [f"{x + left},{top - y}"]
+            coords += [(x + left, top - y)]
         x += 1
     x = 1
     y += 1
     while x < 8:
         if 1 <= x <= 3 or 5 <= x <= 7:
-            coords += [f"{x + left},{top - y}"]
+            coords += [(x + left, top - y)]
         x += 1
     x = 1
     y += 1
     while x < 8:
         if x == 3 or x == 5:
-            coords += [f"{x + left},{top - y}"]
+            coords += [(x + left, top - y)]
         x += 1
     x = 1
     y += 1
     while x < 8:
         if x == 3 or 5 <= x <= 7:
-            coords += [f"{x + left},{top - y}"]
+            coords += [(x + left, top - y)]
         x += 1
     return coords
 
@@ -64,12 +61,11 @@ def set_42_coordinates(width: int, height: int):
     coord_str = ""
     for x in range(len(coord_list)):
         if x != len(coord_list) - 1:
-            coord_str += f"{coord_list[x]}:"
+            coord_str += f"{coord_list[x][0]},{coord_list[x][1]}:"
         else:
-            coord_str += coord_list[x]
+            coord_str += f"{coord_list[x][0]},{coord_list[x][1]}"
 
-    x = [coord_list, coord_str]
-    return x
+    return [coord_list, coord_str]
 
 
 def get_entry(width: int, height: int, coords_42: list):
