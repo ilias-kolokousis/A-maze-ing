@@ -1,12 +1,33 @@
-import configuration.configuration as config
-import generate.generate as gen
+import configuration.configuration as conf
+from configparser import ConfigParser
+import prims
+import os
+
+
+def choose_algo(fd: str):
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    filename = os.path.basename(fd)
+    config_path = os.path.join(script_dir, filename)
+    print(config_path)
+
+    config = ConfigParser()
+    file = config.read(config_path)
+    if not file:
+        raise FileNotFoundError(f"Could not open file: {fd}")
+
+    width = config.getint('size', 'width')
+    height = config.getint('size', 'height')
+    if config.get('size', 'perfect') == 'True':
+        prims.generate_prim(width, height, config_path)
+    else:
+        print("generate with hunt-n-kill")
 
 
 def main():
-    if config.generate_random_config():
-        gen.generate_hex("./src/default_config.ini")
+    if conf.generate_random_config():
+        choose_algo("./default_config.ini")
     else:
-        gen.generate_hex("./src/custom_config.ini")
+        choose_algo("./custom_config.ini")
 
 
 if __name__ == "__main__":

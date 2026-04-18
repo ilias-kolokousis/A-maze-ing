@@ -9,16 +9,6 @@ def get_x_y(width: int, height: int) -> tuple[int]:
     return (x, y)
 
 
-config_filepath: str = 'default_config.ini'
-
-
-config: ConfigParser = ConfigParser()
-file: list = config.read(config_filepath)
-width: int = config.getint('size', 'width')
-height: int = config.getint('size', 'height')
-start: tuple[int] = get_x_y(width - 1, height - 1)
-
-
 def grid_init(width: int, height: int) -> list[list[int]]:
     grid: list[list[int]] = []
     for h_length in range(height):
@@ -27,9 +17,6 @@ def grid_init(width: int, height: int) -> list[list[int]]:
             grid[h_length].append(15)
     return grid
 
-
-grid: list[list[int]] = grid_init(width, height)
-visited: set[tuple] = {start}
 
 change_bit: dict = {'W': lambda x: x & ~(1 << 3),
                     'E': lambda x: x & ~(1 << 1),
@@ -65,10 +52,22 @@ def str_to_tuple(s: str) -> tuple:
     return (int(lst[0]), int(lst[1]))
 
 
-def generate_prim(width: int, height: int):
+def generate_prim(width: int, height: int, fd: str):
+    config = ConfigParser()
+
+    file = config.read(fd)
+
+    if not file:
+        raise FileNotFoundError(f"Configuration file not found: {fd}")
+
+    start: tuple[int] = get_x_y(width - 1, height - 1)
+    grid: list[list[int]] = grid_init(width, height)
+    visited: set[tuple] = {start}
+
     grid = grid_init(width, height)
 
-    visited = conf.set_42_coordinates(width, height)[0]
+    visited = set(conf.set_42_coordinates(width, height)[0])
+    print(visited)
     start_cell = str_to_tuple(config.get('size', 'entry'))
     visited.add(start_cell)
 
@@ -92,4 +91,12 @@ def generate_prim(width: int, height: int):
                 if next_neighbor not in visited:
                     frontier.append((next_neighbor, current))
 
-    return grid
+    for row in range(height):
+        for cell in range(width):
+            grid[row][cell] = str(hex(grid[row][cell]))[2:].upper()
+
+    output = ''
+    for row in grid:
+        output += ''.join(row) + '\n'
+    with open('output.txt', 'w') as f:
+        f.write(output)

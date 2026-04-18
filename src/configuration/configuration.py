@@ -3,7 +3,7 @@ import random
 
 
 def plot_42(left: int, top: int):
-    x = 1
+    x = 0
     y = 0
     coords = []
     while x < 8:
@@ -46,16 +46,8 @@ def set_42_coordinates(width: int, height: int):
         pad_left = pad_right + 1
     else:
         pad_left = pad_right
-    print(f"Pad_right: {pad_right}")
-    print(f"Pad_left: {pad_left}")
 
     pad_top = int((height - 5) / 2)
-    if (height % 2) == 0:
-        pad_bottom = pad_top + 1
-    else:
-        pad_bottom = pad_top
-    print(f"Pad_top: {pad_top}")
-    print(f"Pad_bottom: {pad_bottom}")
 
     coord_list = plot_42(pad_left, height - pad_top)
     coord_str = ""
@@ -117,15 +109,19 @@ def generate_seed_config(seed: int):
     perfect = random.choice([True, False])
     output = "maze.txt"
 
-    config['custom'] = {
-        "SEED": seed,
+    config['seed'] = {
+        "SEED": seed
+        }
+
+    config['size'] = {
         "WIDTH": width,
         "HEIGHT": height,
         "ENTRY": entry,
         "EXIT": exit,
         "OUTPUT_FILE": output,
         "PERFECT": perfect,
-        "42_COORDS": coord_42}
+        "42_COORDS": coord_42
+    }
 
     with open('./src/custom_config.ini', 'w') as configfile:
         config.write(configfile)
@@ -173,8 +169,7 @@ def generate_random_config():
 
 
 def main():
-    x = set_42_coordinates(20, 20)
-    print(x[0], x[1])
+    generate_random_config()
 
 
 if __name__ == "__main__":
