@@ -8,31 +8,31 @@ def plot_42(left: int, top: int):
     coords = []
     while x < 8:
         if x == 1 or 5 <= x <= 7:
-            coords += [(x + left, top - y)]
+            coords += [(x + left, top + y)]
         x += 1
     x = 1
     y += 1
     while x < 8:
         if x == 1 or x == 7:
-            coords += [(x + left, top - y)]
+            coords += [(x + left, top + y)]
         x += 1
     x = 1
     y += 1
     while x < 8:
         if 1 <= x <= 3 or 5 <= x <= 7:
-            coords += [(x + left, top - y)]
+            coords += [(x + left, top + y)]
         x += 1
     x = 1
     y += 1
     while x < 8:
         if x == 3 or x == 5:
-            coords += [(x + left, top - y)]
+            coords += [(x + left, top + y)]
         x += 1
     x = 1
     y += 1
     while x < 8:
         if x == 3 or 5 <= x <= 7:
-            coords += [(x + left, top - y)]
+            coords += [(x + left, top + y)]
         x += 1
     return coords
 
@@ -41,15 +41,11 @@ def set_42_coordinates(width: int, height: int):
     if width < 9 or height < 7:
         return None
 
-    pad_right = int((width - 7) / 2)
-    if (width % 2) == 0:
-        pad_left = pad_right + 1
-    else:
-        pad_left = pad_right
+    pad_left = int((width - 8) / 2)
 
     pad_top = int((height - 5) / 2)
 
-    coord_list = plot_42(pad_left, height - pad_top)
+    coord_list = plot_42(pad_left, pad_top)
     coord_str = ""
     for x in range(len(coord_list)):
         if x != len(coord_list) - 1:
@@ -62,8 +58,8 @@ def set_42_coordinates(width: int, height: int):
 
 def get_entry(width: int, height: int, coords_42: list):
     while True:
-        entry = str(
-            f"{random.randrange(1, width)},{random.randrange(1, height)}"
+        entry = tuple(
+            (random.randint(0, width - 1), random.randint(0, height - 1))
         )
         found_same = False
         for coord in coords_42:
@@ -72,7 +68,7 @@ def get_entry(width: int, height: int, coords_42: list):
                 break
         if found_same:
             continue
-        return entry
+        return f"{entry[0]},{entry[1]}"
 
 
 def get_exit(width: int, height: int, coords_42: list, entry: str):

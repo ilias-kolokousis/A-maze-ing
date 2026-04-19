@@ -10,7 +10,7 @@ install: requirements.txt
 run: install
 	@. $(VENV)/bin/activate
 	@clear
-	@$(PYTHON) ./src/a_maze_ing.py
+	@$(PYTHON) src/a_maze_ing.py
 
 lint: install
 	flake8 
