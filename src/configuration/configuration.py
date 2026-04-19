@@ -53,6 +53,7 @@ def set_42_coordinates(width: int, height: int):
         else:
             coord_str += f"{coord_list[x][0]},{coord_list[x][1]}"
 
+    print(coord_str)
     return [coord_list, coord_str]
 
 
@@ -165,7 +166,7 @@ def generate_random_config():
 
 
 def main():
-    generate_random_config()
+    set_42_coordinates(20, 20)
 
 
 if __name__ == "__main__":
