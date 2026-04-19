@@ -21,5 +21,6 @@ clean:
 	@rm -rf ./src/configuration/__pycache__
 	@rm -rf $(VENV)
 	@rm -rf ./src/custom_config.ini
+	@rm -rf output.txt
 
 .PHONY: run clean
