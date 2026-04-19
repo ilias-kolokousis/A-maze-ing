@@ -8,7 +8,6 @@ def choose_algo(fd: str):
     script_dir = os.path.dirname(os.path.abspath(__file__))
     filename = os.path.basename(fd)
     config_path = os.path.join(script_dir, filename)
-    print(config_path)
 
     config = ConfigParser()
     file = config.read(config_path)

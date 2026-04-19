@@ -66,8 +66,10 @@ def generate_prim(width: int, height: int, fd: str):
 
     grid = grid_init(width, height)
 
-    visited = set(conf.set_42_coordinates(width, height)[0])
-    print(visited)
+    try:
+        visited = set(conf.set_42_coordinates(width, height)[0])
+    except TypeError:
+        visited = set()
     start_cell = str_to_tuple(config.get('size', 'entry'))
     visited.add(start_cell)
 

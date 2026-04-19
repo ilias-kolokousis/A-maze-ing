@@ -53,7 +53,6 @@ def set_42_coordinates(width: int, height: int):
         else:
             coord_str += f"{coord_list[x][0]},{coord_list[x][1]}"
 
-    print(coord_str)
     return [coord_list, coord_str]
 
 
@@ -147,14 +146,12 @@ def generate_random_config():
             else:
                 seed = random.randint(0, 999999999999999999)
                 generate_seed_config(seed)
-                print(f"Seed: {seed}")
         elif (
             is_seed == 'n' or
             is_seed == 'no' or is_seed == 'NO'
         ):
             seed = random.randint(0, 999999999999999999)
             generate_seed_config(seed)
-            print(f"Seed: {seed}")
     else:
         go_again = input(
             'Could not understand your input, do you want to retry? (y/n)'
