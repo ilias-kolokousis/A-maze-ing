@@ -2,6 +2,7 @@
 
 import random
 from maze_class import Maze
+from solve_maze import solve_maze
 
 
 def _get_x_y(maze: Maze) -> tuple[int]:
@@ -151,6 +152,7 @@ def create_maze() -> None:
             start = _hunt(maze, start, visited)
         start = _kill(maze, start, visited)
 
+    print(solve_maze(maze))
     for row in range(maze.height):
         for cell in range(maze.width):
             maze.grid[row][cell] = str(hex(maze.grid[row][cell]))[2:].upper()
