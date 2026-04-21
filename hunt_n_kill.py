@@ -142,7 +142,7 @@ def create_maze() -> None:
     maze: Maze = Maze('custom_config.ini')
     start: tuple[int] = _get_x_y(maze)
     while start in maze.coords_42:
-        start = _get_x_y(maze.width - 1, maze.height - 1)
+        start = _get_x_y(maze)
     visited: set[tuple] = {start}
 
     while len(visited) + len(maze.coords_42) < maze.width * maze.height:
@@ -152,13 +152,18 @@ def create_maze() -> None:
             start = _hunt(maze, start, visited)
         start = _kill(maze, start, visited)
 
-    print(solve_maze(maze))
+    entry: str = f'{maze.entry[0]},{maze.entry[1]}'
+    exit: str = f'{maze.exit[0]},{maze.exit[1]}'
+    path: str = ''.join(solve_maze(maze))
+    # print(len(path))
+
     for row in range(maze.height):
         for cell in range(maze.width):
             maze.grid[row][cell] = str(hex(maze.grid[row][cell]))[2:].upper()
     output = ''
     for row in maze.grid:
         output += ''.join(row) + '\n'
+    output += f'\n{entry}\n{exit}\n{path}'
     with open(maze.output_file, 'w') as f:
         f.write(output)
 

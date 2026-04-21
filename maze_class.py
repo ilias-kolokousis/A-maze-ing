@@ -35,9 +35,9 @@ class Maze():
         """
         config: ConfigParser = ConfigParser()
         config.read(config_path)
-        self.seed: int = config.getint('custom', 'seed')
-        if self.seed is not None:
-            random.seed(self.seed)
+        self.seed: int = config.get('custom', 'seed')
+        # if self.seed is not None:
+        #     random.seed(self.seed)
         self.width: int = config.getint('custom', 'width')
         self.height: int = config.getint('custom', 'height')
         self.entry: tuple[int, ...] = tuple(

@@ -16,22 +16,26 @@ class Node():
         return self.g + self.h
 
 
+def find_direction(curr_cell: tuple[int, int],
+                   neighbor: tuple[int, int]) -> str:
+    if curr_cell[0] != neighbor[0]:
+        return 'W' if curr_cell[0] - 1 == neighbor[0] else 'E'
+    elif curr_cell[1] != neighbor[1]:
+        return 'N' if curr_cell[1] - 1 == neighbor[1] else 'S'
+
+
 def is_blocked(maze: Maze, curr_cell: tuple[int, int],
                neighbor: tuple[int, int]) -> bool:
-    if curr_cell[0] != neighbor[0]:
-        dir: str = 'W' if curr_cell[0] - 1 == neighbor[0] else 'E'
-    elif curr_cell[1] != neighbor[1]:
-        dir: str = 'N' if curr_cell[1] - 1 == neighbor[1] else 'S'
-
+    direction: str = find_direction(curr_cell, neighbor)
     cell: int = int(maze.grid[curr_cell[1]][curr_cell[0]])
 
-    if dir == 'N':
+    if direction == 'N':
         return (cell & 0b0001)
-    elif dir == 'E':
+    elif direction == 'E':
         return (cell & 0b0010)
-    elif dir == 'S':
+    elif direction == 'S':
         return (cell & 0b0100)
-    elif dir == 'W':
+    elif direction == 'W':
         return (cell & 0b1000)
 
 
@@ -66,6 +70,9 @@ def solve_maze(maze: Maze) -> list[tuple]:
         for node in open:
             if open[node].f < lowest_f_node.f:
                 lowest_f_node = open[node]
+            elif (open[node].f == lowest_f_node.f
+                  and open[node].g > lowest_f_node.g):
+                lowest_f_node = open[node]
 
         closed.update({lowest_f_node.current_cell: lowest_f_node})
         del open[lowest_f_node.current_cell]
@@ -95,7 +102,11 @@ def solve_maze(maze: Maze) -> list[tuple]:
     while path[-1] != maze.entry:
         path.append(lowest_f_node.parent)
         lowest_f_node = closed[lowest_f_node.parent]
-    return path
+    path.reverse()
+    path_dir: list[str] = []
+    for cell in range(len(path) - 1):
+        path_dir.append(find_direction(path[cell], path[cell + 1]))
+    return path_dir
 
 
 if __name__ == "__main__":
