@@ -1,6 +1,6 @@
 import random
 from configparser import ConfigParser
-import configuration.configuration as conf
+from configuration import configuration as conf
 
 
 def get_x_y(width: int, height: int) -> tuple[int]:
@@ -11,10 +11,11 @@ def get_x_y(width: int, height: int) -> tuple[int]:
 
 def grid_init(width: int, height: int) -> list[list[int]]:
     grid: list[list[int]] = []
-    for h_length in range(height):
+    for index_y in range(height):
         grid.append([])
-        for w_length in range(width):
-            grid[h_length].append(15)
+        for index_x in range(width):
+            grid[index_y].append(15)
+    print(grid)
     return grid
 
 

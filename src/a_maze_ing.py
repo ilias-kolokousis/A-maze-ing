@@ -1,7 +1,8 @@
 import configuration.configuration as conf
 from configparser import ConfigParser
-import prims
+import prims as prims
 import os
+import sys
 
 
 def choose_algo(fd: str):
@@ -17,14 +18,14 @@ def choose_algo(fd: str):
     width = config.getint('size', 'width')
     height = config.getint('size', 'height')
     if config.get('size', 'perfect') == 'True':
-        prims.generate_prim(width, height, config_path)
+        prims.generate_prim(width, height, sys.argv[1])
     else:
         print("generate with hunt-n-kill")
 
 
 def main():
     if conf.generate_random_config():
-        choose_algo("./default_config.ini")
+        choose_algo(f"./{sys.argv[1]}")
     else:
         choose_algo("./custom_config.ini")
 

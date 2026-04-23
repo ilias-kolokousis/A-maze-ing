@@ -134,6 +134,8 @@ def generate_random_config():
             for x in range(3):
                 try:
                     seed = int(input('Seed:'))
+                    if seed == "999999999" or seed == 999999999 or not seed:
+                        return (1)
                     valid_seed = True
                     break
                 except ValueError as e:
@@ -160,11 +162,3 @@ def generate_random_config():
             generate_random_config()
         else:
             exit()
-
-
-def main():
-    set_42_coordinates(20, 20)
-
-
-if __name__ == "__main__":
-    main()
