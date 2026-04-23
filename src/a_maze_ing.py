@@ -4,9 +4,9 @@ import generate.generate as gen
 
 def main():
     if config.generate_random_config():
-        gen.generate_hex("./src/default_config.ini")
+        # choose alg
     else:
-        gen.generate_hex("./src/custom_config.ini")
+        # choose alg
 
 
 if __name__ == "__main__":

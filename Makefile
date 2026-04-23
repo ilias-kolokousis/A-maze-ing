@@ -12,6 +12,11 @@ run: install
 	@clear
 	@$(PYTHON) ./src/a_maze_ing.py
 
+debug: install
+	@. $(VENV)/bin/activate
+	@clear
+	@$(PYTHON) -m pdb ./src/a_maze_ing.py
+
 lint: install
 	flake8 
 	mypy --warn-return-any
