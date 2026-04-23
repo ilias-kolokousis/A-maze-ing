@@ -10,7 +10,7 @@ install: requirements.txt
 run: install
 	@. $(VENV)/bin/activate
 	@clear
-	@$(PYTHON) ./src/a_maze_ing.py
+	@$(PYTHON) src/a_maze_ing.py
 
 debug: install
 	@. $(VENV)/bin/activate
@@ -26,5 +26,6 @@ clean:
 	@rm -rf ./src/configuration/__pycache__
 	@rm -rf $(VENV)
 	@rm -rf ./src/custom_config.ini
+	@rm -rf output.txt
 
 .PHONY: run clean
