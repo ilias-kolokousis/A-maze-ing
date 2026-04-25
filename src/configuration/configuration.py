@@ -1,8 +1,28 @@
-import configparser
 import random
 
 
-def plot_42(left: int, top: int):
+def coord_str_to_tuple(s: str) -> tuple[int, int]:
+    lst = s.split(',')
+    return (int(lst[0]), int(lst[1]))
+
+
+def plot_42(left: int, top: int) -> list[tuple[int, int]]:
+    """
+    Calculates coordinates of the 42 cells
+
+    Parameters
+    ----------
+    left : int
+        The padding from the left side
+    top : int
+        The padding from the top side
+
+    Returns
+    -------
+    list[tuple]
+        returns a list of tuppels
+          containing the x and y coordinates of each 42 cell
+    """
     x = 0
     y = 0
     coords = []
@@ -37,7 +57,29 @@ def plot_42(left: int, top: int):
     return coords
 
 
-def set_42_coordinates(width: int, height: int):
+CoordResult = tuple[list[tuple[int, int]], str]
+
+
+def set_42_coords(width: int, height: int) -> CoordResult | None:
+    """
+    Calculates the padding on top and left, and calls
+     the plot_42() function when 42 cells fit within maze size
+
+    Parameters
+    ----------
+    width : int
+        The width of the maze
+    height : int
+        The height of the maze
+
+    Returns
+    -------
+    tuple[list[tuple], str]
+        A tuple containing a list with tuples containing the 42
+         cell coordinates, and a string representing the same coordinates
+    None
+
+    """
     if width < 9 or height < 7:
         return None
 
@@ -53,10 +95,31 @@ def set_42_coordinates(width: int, height: int):
         else:
             coord_str += f"{coord_list[x][0]},{coord_list[x][1]}"
 
-    return [coord_list, coord_str]
+    return (coord_list, coord_str)
 
 
-def get_entry(width: int, height: int, coords_42: list):
+ListTuples = list[tuple[int, int]]
+
+
+def get_entry(width: int, height: int, coords_42: ListTuples) -> str:
+    """
+    Randomizes a valid entry point within the maze boundaries,
+     and outside of the 42 coordinates
+
+    Parameters
+    ----------
+    width : int
+        Width of the maze
+    height : int
+        Height of the maze
+    coords_42 : list
+        List of tuples containing coordinates of the 42 cells
+
+    Returns
+    -------
+    str
+        A string representation of the coordinates of the entry cell
+    """
     while True:
         entry = tuple(
             (random.randint(0, width - 1), random.randint(0, height - 1))
@@ -71,10 +134,34 @@ def get_entry(width: int, height: int, coords_42: list):
         return f"{entry[0]},{entry[1]}"
 
 
-def get_exit(width: int, height: int, coords_42: list, entry: str):
+def get_exit(
+        width: int, height: int,
+        coords_42: list[tuple[int, int]], entry_str: str
+        ) -> str:
+    """
+    Randomizes a valid exit point within the maze boundaries,
+     and outside of the 42 coordinates and entry cell
+
+    Parameters
+    ----------
+    width : int
+        Width of the maze
+    height : int
+        Height of the maze
+    coords_42 : list[tuple[int]]
+        List of tuples containing coordinates of the 42 cells
+    entry : str
+        A string representation of the coordinates of the entry cell
+
+    Returns
+    -------
+    str
+        A string representation of the coordinates of the exit cell
+    """
     while True:
-        exit = str(
-            f"{random.randrange(1, width)},{random.randrange(1, height)}"
+        entry = coord_str_to_tuple(entry_str)
+        exit = tuple(
+            (random.randint(0, width - 1), random.randint(0, height - 1))
         )
         found_same = False
         for coord in coords_42:
@@ -83,19 +170,25 @@ def get_exit(width: int, height: int, coords_42: list, entry: str):
                 break
         if found_same:
             continue
-        return exit
+        return f"{exit[0]},{exit[1]}"
 
 
-def generate_seed_config(seed: int):
-    config = configparser.ConfigParser()
+def generate_seed_config(seed: int) -> None:
+    """Generates a random config file using a seed
+
+    Parameters
+    ----------
+    seed : int
+        Seed to be used in randomization
+    """
     random.seed(seed)
-    width = random.randrange(4, 40)
-    height = random.randrange(4, width)
+    width: int = random.randrange(4, 40)
+    height: int = random.randrange(4, width)
+    coords: CoordResult | None = set_42_coords(width, height)
 
-    coords = set_42_coordinates(width, height)
     if coords is None:
-        coord_42 = ""
         coords_list = []
+        coord_42 = ""
     else:
         coords_list = coords[0]
         coord_42 = coords[1]
@@ -103,27 +196,35 @@ def generate_seed_config(seed: int):
     entry = get_entry(width, height, coords_list)
     exit = get_exit(width, height, coords_list, entry)
     perfect = random.choice([True, False])
-    output = "maze.txt"
+    output = "output.txt"
 
-    config['seed'] = {
-        "SEED": seed
-        }
+    try:
+        with open('./src/custom_config.txt', 'w') as f:
+            f.write(f"seed = {seed}\n")
+            f.write(f"width = {width}\n")
+            f.write(f"height = {height}\n")
+            f.write(f"entry = {entry}\n")
+            f.write(f"exit = {exit}\n")
+            f.write(f"output_file = {output}\n")
+            f.write(f"perfect = {perfect}\n")
+            f.write(f"42_coords = {coord_42}\n")
+    except PermissionError:
+        print("Error: No permission to write to './src/custom_config.txt'")
+        return
+    except OSError as e:
+        print(f"Error: Could not write config file: {e}")
+        return
 
-    config['size'] = {
-        "WIDTH": width,
-        "HEIGHT": height,
-        "ENTRY": entry,
-        "EXIT": exit,
-        "OUTPUT_FILE": output,
-        "PERFECT": perfect,
-        "42_COORDS": coord_42
-    }
 
-    with open('./src/custom_config.ini', 'w') as configfile:
-        config.write(configfile)
+def generate_random_config() -> bool:
+    """Takes the user input, and generates a desired config file
 
-
-def generate_random_config():
+    Returns
+    -------
+    bool
+        returns True when default settings should be used,
+         and False when a custom config file should be used
+    """
     x = input('Use default settings? (y/n)      ')
     if (x == 'y' or x == 'yes' or x == 'YES'):
         return True
@@ -131,17 +232,17 @@ def generate_random_config():
         is_seed = input('Use a seed? (y/n)      ')
         if (is_seed == 'y' or is_seed == 'yes' or is_seed == 'YES'):
             valid_seed = False
-            for x in range(3):
+            for i in range(3):
                 try:
                     seed = int(input('Seed:'))
-                    if seed == "999999999" or seed == 999999999 or not seed:
-                        return (1)
+                    if seed == 999999999 or not seed:
+                        return True
                     valid_seed = True
                     break
                 except ValueError as e:
                     print(f"Seed needs to be an integer: {e}")
-                    print(f"Try {x + 1}/3")
-                    if x == 2:
+                    print(f"Try {i + 1}/3")
+                    if i == 2:
                         print("Continueing with random seed...")
             if valid_seed:
                 generate_seed_config(seed)
@@ -154,6 +255,7 @@ def generate_random_config():
         ):
             seed = random.randint(0, 999999999999999999)
             generate_seed_config(seed)
+        return False
     else:
         go_again = input(
             'Could not understand your input, do you want to retry? (y/n)'
@@ -162,3 +264,4 @@ def generate_random_config():
             generate_random_config()
         else:
             exit()
+    return False

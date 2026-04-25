@@ -10,22 +10,31 @@ install: requirements.txt
 run: install
 	@. $(VENV)/bin/activate
 	@clear
-	@$(PYTHON) src/a_maze_ing.py
+	@$(PYTHON) src/a_maze_ing.py src/default_config.txt
 
 debug: install
 	@. $(VENV)/bin/activate
 	@clear
 	@$(PYTHON) -m pdb ./src/a_maze_ing.py
 
-lint: install
-	flake8 
-	mypy --warn-return-any
+lint:
+	@echo "\033[35mflake8\033[0m"
+	@flake8 ./src
+	@echo "\033[35mmypy\033[0m"
+	@mypy --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs ./src
+
+lint-strict:
+	@echo "\033[35mflake8\033[0m"
+	@flake8 ./src
+	@echo "\033[35mmypy\033[0m"
+	@mypy --strict ./src
 
 clean:
 	@rm -rf ./src/configuration/conf_scripts/__pycache__
+	@rm -rf ./src/__pycache__
 	@rm -rf ./src/configuration/__pycache__
 	@rm -rf $(VENV)
-	@rm -rf ./src/custom_config.ini
+	@rm -rf ./src/custom_config.txt
 	@rm -rf output.txt
 
 .PHONY: run clean
