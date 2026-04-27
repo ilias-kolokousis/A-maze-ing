@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from maze_class import Maze
+from src.maze_class import Maze
 
 
 class Node():

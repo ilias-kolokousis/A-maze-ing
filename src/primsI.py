@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 import random
-from hunt_n_kill import print_state
-from maze_class import Maze
-from viz import render, create_grid
-from solve_maze import solve_maze
+from src.hunt_n_kill import print_state
+from src.maze_class import Maze
+from src.viz import Viz
+from src.solve_maze import solve_maze
 
 
 def _get_x_y(maze: Maze) -> tuple[int]:
@@ -76,11 +76,43 @@ def str_to_tuple(s: str) -> tuple:
     return (int(lst[0]), int(lst[1]))
 
 
-def generate_prim():
+def generate_prim() -> None:
+    """Utilise Prim's algorithm to generate a perfect maze"""
+    f = open(fd, 'r')
+
+    config = {}
+    with f:
+        for line in f:
+            line = line.strip().lower()
+            if '=' in line:
+                key, value = line.split('=', 1)
+                config[key.strip()] = value.strip()
+
+    try:
+        if 'seed' not in config:
+            seed = 999999999
+        else:
+            seed = int(config['seed'])
+    except ValueError:
+        print(f"Error: 'seed' must be an integer, got '{config['seed']}'")
+        return
+
+    try:
+        start_cell = str_to_tuple(config['entry'])
+    except (ValueError, TypeError):
+        print(f"Error: 'entry' has an invalid format, got '{config['entry']}'")
+        return
+
+    if not (0 <= start_cell[0] < width and 0 <= start_cell[1] < height):
+        print(
+            f"Error: Entry point {start_cell} is out of "
+            f"bounds for maze of size {width}x{height}"
+        )
+        return
+    
     maze: Maze = Maze('custom_config.ini')
 
-    start: tuple[int] = _get_x_y(maze)
-    visited: set[tuple] = {start}
+    visited: set[tuple] = {}
 
     try:
         visited = set(maze.coords_42)

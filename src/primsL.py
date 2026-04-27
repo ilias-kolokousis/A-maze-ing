@@ -1,99 +1,75 @@
 import random
-from typing import Callable
-import configuration.configuration as conf
+from src.hunt_n_kill import print_state
+from src.maze_class import Maze
+from src.viz import render, create_grid
+from src.solve_maze import solve_maze
 
 
-def grid_init(width: int, height: int) -> list[list[int]]:
-    """Initiates the grid and filling it up with the integer
-    representation of binary 1111
+def _get_x_y(maze: Maze) -> tuple[int]:
+    """Create a tuple with random values in the limits of our grid
+    to start creating the maze.
 
-    Parameters
-    ----------
-    width : int
-        Width of the maze
-    height : int
-        Height of the maze
+    Args:
+        maze (Maze): our maze object holding all the attributes for size
 
-    Returns
-    -------
-    list[list[int]]
-        Initiated grid
+    Returns:
+        tuple[int]: a random point inside the grid. The order signifies
+        x and y respectively.
     """
-    grid: list[list[int]] = []
-    for index_y in range(height):
-        grid.append([])
-        for index_x in range(width):
-            grid[index_y].append(15)
-    return grid
-
-
-change_bit: dict[str, Callable[[int], int]] = {
-    'W': lambda x: x & ~(1 << 3),
-    'E': lambda x: x & ~(1 << 1),
-    'S': lambda x: x & ~(1 << 2),
-    'N': lambda x: x & ~(1 << 0)
-}
-
-change_direction: dict[str, str] = {'N': 'S', 'S': 'N', 'E': 'W', 'W': 'E'}
+    x: int = random.randint(0, maze.width - 1)
+    y: int = random.randint(0, maze.height - 1)
+    return (x, y)
 
 
 CrdTup = tuple[int, int]
 GridList = list[list[int]]
 
 
-def set_neighbors(current: CrdTup, width: int, height: int) -> list[CrdTup]:
-    """Finds all neighbors of the current cell
+def _produce_neighbors(maze: Maze, start: tuple) -> list[tuple]:
+    """Produce a list of neighbor cells that we can continue on.
+    It checks and eliminates any candidates that are outside of the
+    grid or cells that belong in the '42' graphic.
 
-    Parameters
-    ----------
-    current : CrdTup
-        The newest cell that has been added to the maze
-    width : int
-        Width of the maze
-    height : int
-        Height of the maze
+    Args:
+        maze (Maze): our maze object holding all the attributes for size
+        start (tuple): the current cell we are on
 
-    Returns
-    -------
-    list[CrdTup]
-        List of tuples with all new neighbors
+    Returns:
+        list[tuple]: all possible neighbors we can move into
     """
-    x: int = current[0]
-    y: int = current[1]
+    x: int = start[0]
+    y: int = start[1]
     candidates = [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]
     return [(nx, ny) for nx, ny in candidates
-            if nx >= 0 and nx < width and ny >= 0 and ny < height]
+            if nx >= 0 and nx < maze.width and ny >= 0 and ny < maze.height]
 
 
-def carve_wall(grid: GridList, cur: CrdTup,
-               next_n: CrdTup) -> tuple[list[list[int]], CrdTup]:
-    """'Carves' a wall between the current cell and the new cell
-         by updating the hex value in the grid
+def _carve_wall(maze: Maze, start: tuple[int],
+                next_cell: tuple[int]) -> None:
+    """Open up a path between two cells, i.e. converts the bit needed of
+    the cell to 0. Bits are following this order, WSEN, and 1 means wall
+    and 0 means no wall. It modifies the grid in-place.
 
-    Parameters
-    ----------
-    grid : GridList
-        The grid
-    cur : CrdTup
-        The current cell
-    next_n : CrdTup
-        The neighboring cell the current cell will connect to
+    For example, if we have closed cell (0,0) (bits: 1111)
+    moving to closed cell (0,1) (bits: 1111), it converts (0,0) to 1011
+    and cell (0,1) to 1110.
 
-    Returns
-    -------
-    tuple[list[list[int]], CrdTup]
-        Returns a tuple containing the updated grid,
-         as well as the new current cell
+    Args:
+        maze (Maze): our maze object, needed for the grid and the
+        attributes for opening up walls.
+        start (tuple[int]): the current cell
+        next_cell (tuple[int]): the cell we are moving into
     """
-    if cur[0] != next_n[0]:
-        dir: str = 'W' if cur[0] - 1 == next_n[0] else 'E'
-    elif cur[1] != next_n[1]:
-        dir = 'N' if cur[1] - 1 == next_n[1] else 'S'
+    if start[0] != next_cell[0]:
+        dir: str = 'W' if start[0] - 1 == next_cell[0] else 'E'
+    elif start[1] != next_cell[1]:
+        dir: str = 'N' if start[1] - 1 == next_cell[1] else 'S'
 
-    grid[cur[1]][cur[0]] = change_bit[dir](grid[cur[1]][cur[0]])
-    dir = change_direction[dir]
-    grid[next_n[1]][next_n[0]] = change_bit[dir](grid[next_n[1]][next_n[0]])
-    return (grid, cur)
+    maze.grid[start[1]][start[0]] = maze.change_bit[dir](
+        maze.grid[start[1]][start[0]])
+    dir = maze.change_direction[dir]
+    maze.grid[next_cell[1]][next_cell[0]] = maze.change_bit[dir](
+        maze.grid[next_cell[1]][next_cell[0]])
 
 
 def generate_prim(width: int, height: int, fd: str) -> None:
@@ -139,6 +115,8 @@ def generate_prim(width: int, height: int, fd: str) -> None:
             f"bounds for maze of size {width}x{height}"
         )
         return
+    
+    #######################################################
 
     grid: list[list[int]] = grid_init(width, height)
 

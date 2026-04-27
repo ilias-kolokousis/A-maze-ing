@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 
 import random
-from configparser import ConfigParser
 from typing import Callable, TypeAlias
-from pathlib import Path
-from configuration import plot_42
+from src.configuration.configuration import plot_42
 
 BitOp: TypeAlias = Callable[[int], int]
 
@@ -28,33 +26,35 @@ class Maze():
 
     change_direction: dict[str, str] = {'N': 'S', 'S': 'N', 'E': 'W', 'W': 'E'}
 
-    def __init__(self, config_path: str) -> None:
+    def __init__(self, config: dict) -> None:
         """Initialization of a Maze object. Can be used instead of accessing
         the config file everytime. Initiliazes also a grid.
 
         Args:
             config_path (str): path to the config.ini file
         """
-        if not Path(config_path).exists():
-            raise Exception
-        config: ConfigParser = ConfigParser()
-        config.read(config_path)
-        self.seed: int = config.get('custom', 'seed')
+        self.seed: int = int(config.get('seed'))
         if self.seed is not None:
-            random.seed(self.seed)
-        self.width: int = config.getint('custom', 'width')
-        self.height: int = config.getint('custom', 'height')
+            random.seed(int(self.seed))
+        self.width: int = int(config.get('width'))
+        self.height: int = int(config.get('height'))
         self.entry: tuple[int, ...] = tuple(
-            int(x) for x in config.get('custom', 'entry').split(','))
+            int(x) for x in config.get('entry').split(','))
         self.exit: tuple[int, ...] = tuple(
-            int(x) for x in config.get('custom', 'exit').split(','))
-        self.output_file: str = config.get('custom', 'output_file')
-        self.perfect: bool = config.getboolean('custom', 'perfect')
+            int(x) for x in config.get('exit').split(','))
+        self.output_file: str = config.get('output_file')
+        self.perfect: bool = config.get('perfect').lower() == 'true'
         self.grid: list[list[int]] = [[15 for w in range(self.width)]
                                       for h in range(self.height)]
 
     @property
     def coords_42(self) -> list[tuple[int, ...]] | None:
+        """Set the coordinates for the 42 graphic
+
+        Returns:
+            list[tuple[int, ...]] | None: a list of coordinates. None if
+            the maze is too small for 42 to fit
+        """
         if self.width < 9 or self.height < 7:
             return None
 
@@ -62,6 +62,25 @@ class Maze():
         pad_top: int = (self.height - 5) // 2
 
         return plot_42(pad_left, pad_top)
+
+    def grid_init(self) -> None:
+        """Initiliaze the grid if needed"""
+        self.grid: list[list[int]] = [[15 for w in range(self.width)]
+                                      for h in range(self.height)]
+
+
+def tester(maze: Maze) -> None:
+    for key, value in maze.__dict__.items():
+        if key == 'grid':
+            initialized: bool = all(all(x == 15 for x in i) for i in value)
+            correct_size: bool = (len(value) == maze.height
+                                  and all(len(x) == maze.width
+                                          for x in value))
+            print("Grid initialized and"
+                  f" correct size: {initialized and correct_size}")
+        else:
+            print(f'{key}: {value}')
+    print(f'coords_42: {maze.coords_42}')
 
 
 if __name__ == '__main__':
@@ -72,9 +91,8 @@ if __name__ == '__main__':
             correct_size: bool = (len(value) == maze.height
                                   and all(len(x) == maze.width
                                           for x in value))
-            print(f"""
-Grid initialized and correct size: {initialized and correct_size}
-                    """)
+            print("Grid initialized and"
+                  f" correct size: {initialized and correct_size}")
         else:
             print(f'{key}: {value}')
     print(f'coords_42: {maze.coords_42}')

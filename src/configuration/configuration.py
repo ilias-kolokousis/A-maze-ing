@@ -187,19 +187,19 @@ def generate_seed_config(seed: int) -> None:
     coords: CoordResult | None = set_42_coords(width, height)
 
     if coords is None:
-        coords_list = []
-        coord_42 = ""
+        coords_list: list = []
+        coord_42: str = ""
     else:
-        coords_list = coords[0]
-        coord_42 = coords[1]
+        coords_list: list = coords[0]
+        coord_42: str = coords[1]
 
-    entry = get_entry(width, height, coords_list)
-    exit = get_exit(width, height, coords_list, entry)
-    perfect = random.choice([True, False])
-    output = "output.txt"
+    entry: str = get_entry(width, height, coords_list)
+    exit: str = get_exit(width, height, coords_list, entry)
+    perfect: bool = random.choice([True, False])
+    output: str = "output.txt"
 
     try:
-        with open('./src/custom_config.txt', 'w') as f:
+        with open('custom_config.txt', 'w') as f:
             f.write(f"seed = {seed}\n")
             f.write(f"width = {width}\n")
             f.write(f"height = {height}\n")
@@ -209,7 +209,7 @@ def generate_seed_config(seed: int) -> None:
             f.write(f"perfect = {perfect}\n")
             f.write(f"42_coords = {coord_42}\n")
     except PermissionError:
-        print("Error: No permission to write to './src/custom_config.txt'")
+        print("Error: No permission to write to './custom_config.txt'")
         return
     except OSError as e:
         print(f"Error: Could not write config file: {e}")
@@ -225,16 +225,20 @@ def generate_random_config() -> bool:
         returns True when default settings should be used,
          and False when a custom config file should be used
     """
-    x = input('Use default settings? (y/n)      ')
+    x: str = input('Use default settings? (y/n)      ')
     if (x == 'y' or x == 'yes' or x == 'YES'):
         return True
     elif (x == 'n' or x == 'no' or x == 'NO'):
-        is_seed = input('Use a seed? (y/n)      ')
+        is_seed: str = input('Use a seed? (y/n)      ')
         if (is_seed == 'y' or is_seed == 'yes' or is_seed == 'YES'):
-            valid_seed = False
+            valid_seed: bool = False
+
+            # Get seed. If input is invalid, try 2 more times
+            # to get valid input. In the last try, produce a random seed.
+
             for i in range(3):
                 try:
-                    seed = int(input('Seed:'))
+                    seed: int = int(input('Seed:'))
                     if seed == 999999999 or not seed:
                         return True
                     valid_seed = True
@@ -243,7 +247,7 @@ def generate_random_config() -> bool:
                     print(f"Seed needs to be an integer: {e}")
                     print(f"Try {i + 1}/3")
                     if i == 2:
-                        print("Continueing with random seed...")
+                        print("Continuing with random seed...")
             if valid_seed:
                 generate_seed_config(seed)
             else:
@@ -255,9 +259,18 @@ def generate_random_config() -> bool:
         ):
             seed = random.randint(0, 999999999999999999)
             generate_seed_config(seed)
+        else:
+            go_again: str = input(
+                                  'Could not understand your input,'
+                                  'do you want to retry? (y/n)'
+                                )
+        if (go_again == 'y' or go_again == 'yes' or go_again == 'YES'):
+            generate_random_config()
+        else:
+            exit()
         return False
     else:
-        go_again = input(
+        go_again: str = input(
             'Could not understand your input, do you want to retry? (y/n)'
         )
         if (go_again == 'y' or go_again == 'yes' or go_again == 'YES'):
