@@ -1,6 +1,6 @@
 import random
 from typing import Callable
-from configuration import configuration as conf
+import configuration.configuration as conf
 
 
 def grid_init(width: int, height: int) -> list[list[int]]:
@@ -24,7 +24,6 @@ def grid_init(width: int, height: int) -> list[list[int]]:
         grid.append([])
         for index_x in range(width):
             grid[index_y].append(15)
-    print(grid)
     return grid
 
 
@@ -88,7 +87,7 @@ def carve_wall(grid: GridList, cur: CrdTup,
     """
     if cur[0] != next_n[0]:
         dir: str = 'W' if cur[0] - 1 == next_n[0] else 'E'
-    elif cur[1] and cur[1] != next_n[1]:
+    elif cur[1] != next_n[1]:
         dir = 'N' if cur[1] - 1 == next_n[1] else 'S'
 
     grid[cur[1]][cur[0]] = change_bit[dir](grid[cur[1]][cur[0]])
