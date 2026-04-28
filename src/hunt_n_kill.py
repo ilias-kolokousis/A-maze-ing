@@ -37,9 +37,14 @@ def _produce_neighbors(maze: Maze, start: tuple) -> list[tuple]:
     x: int = start[0]
     y: int = start[1]
     candidates = [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]
-    return [(nx, ny) for nx, ny in candidates
-            if nx >= 0 and nx < maze.width and ny >= 0 and ny < maze.height
-            and (nx, ny) not in maze.coords_42]
+    if maze.coords_42 is not None:
+        return [(nx, ny) for nx, ny in candidates
+                if nx >= 0 and nx < maze.width and ny >= 0 and ny < maze.height
+                and (nx, ny) not in maze.coords_42]
+    else:
+        return [(nx, ny) for nx, ny in candidates
+                if nx >= 0 and nx < maze.width
+                and ny >= 0 and ny < maze.height]
 
 
 def _carve_wall(maze: Maze, start: tuple[int],
@@ -88,15 +93,25 @@ def _hunt(maze: Maze, start: tuple[int], visited: set[tuple]) -> tuple:
     cell_found: bool = False
     for row in range(maze.height):
         for cell in range(maze.width):
-            if ((cell, row) not in visited
-                and (cell, row) not in maze.coords_42
-                and any(n in visited
-                        for n
-                        in _produce_neighbors(maze, (cell, row)))):
-                start = (cell, row)
-                neighbors = _produce_neighbors(maze, start)
-                cell_found = True
-                break
+            if maze.coords_42 is not None:
+                if ((cell, row) not in visited
+                    and (cell, row) not in maze.coords_42
+                    and any(n in visited
+                            for n
+                            in _produce_neighbors(maze, (cell, row)))):
+                    start = (cell, row)
+                    neighbors = _produce_neighbors(maze, start)
+                    cell_found = True
+                    break
+            else:
+                if ((cell, row) not in visited
+                    and any(n in visited
+                    for n
+                            in _produce_neighbors(maze, (cell, row)))):
+                    start = (cell, row)
+                    neighbors = _produce_neighbors(maze, start)
+                    cell_found = True
+                    break
         if cell_found:
             break
 
@@ -132,7 +147,7 @@ def _kill(maze: Maze, start: tuple, visited: set[tuple]) -> tuple:
     return next_cell
 
 
-def create_maze(maze: Maze) -> None:
+def generate_hunt_n_kill(maze: Maze) -> None:
     """The main logic behind the hunt and kill algorithm. It first
     initializes the maze object. Then, it finds a random start in the grid
     and starts 'killing' (carving walls) until there is no unvisited
@@ -141,18 +156,28 @@ def create_maze(maze: Maze) -> None:
     carving new walls.
     """
     start: tuple[int] = _get_x_y(maze)
-    while start in maze.coords_42:
-        start = _get_x_y(maze)
+    if maze.coords_42 is not None:
+        while start in maze.coords_42:
+            start = _get_x_y(maze)
     visited: set[tuple] = {start}
 
     print("\033[2J\033[H", end="", flush=True)
-    while len(visited) + len(maze.coords_42) < maze.width * maze.height:
-        print_state(maze)
-        neighbors: list[tuple] = _produce_neighbors(maze, start)
+    if maze.coords_42 != (0, 0):
+        while len(visited) + len(maze.coords_42) < maze.width * maze.height:
+            print_state(maze)
+            neighbors: list[tuple] = _produce_neighbors(maze, start)
 
-        if all(n in visited for n in neighbors):
-            start = _hunt(maze, start, visited)
-        start = _kill(maze, start, visited)
+            if all(n in visited for n in neighbors):
+                start = _hunt(maze, start, visited)
+            start = _kill(maze, start, visited)
+    else:
+        while len(visited) < maze.width * maze.height:
+            print_state(maze)
+            neighbors: list[tuple] = _produce_neighbors(maze, start)
+
+            if all(n in visited for n in neighbors):
+                start = _hunt(maze, start, visited)
+            start = _kill(maze, start, visited)
 
     print_state(maze)
     grid: list[list[str]] = [row[:] for row in maze.grid]
@@ -178,4 +203,4 @@ def create_maze(maze: Maze) -> None:
 
 
 if __name__ == "__main__":
-    create_maze()
+    generate_hunt_n_kill()

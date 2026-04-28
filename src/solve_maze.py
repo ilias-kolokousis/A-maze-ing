@@ -4,28 +4,68 @@ from src.maze_class import Maze
 
 
 class Node():
+    """Node class that signifies nodes ina sequence of an a*
+    maze solving algorithm"""
     def __init__(self, current_cell: tuple[int, int], g: int = 0,
-                 h: int = 0, parent: tuple[int, int] = None) -> None:
+                 h: int = 0, parent: tuple[int, int] | None = None) -> None:
+        """Initiliaze Node class.
+
+        Args:
+            current_cell (tuple[int, int]): current cell we are at
+            g (int, optional): How many steps it took from start.
+                                Defaults to 0.
+            h (int, optional): How many steps aproximately we need
+                                till the end. Defaults to 0.
+            parent (tuple[int, int], optional): Which node we came from
+                                            to backtrack. Defaults to None.
+        """
         self.current_cell: tuple[int, int] = current_cell
         self.g: int = g
         self.h: int = h
-        self.parent: tuple[int, int] = parent
+        self.parent: tuple[int, int] | None = parent
 
     @property
     def f(self) -> int:
+        """Attribute that gets calculated on the spot.
+        It is part of the Manhattan heuristic. Combines
+        g and h to find the most optimal path.
+
+        Returns:
+            int: Manhattan heuristic
+        """
         return self.g + self.h
 
 
 def find_direction(curr_cell: tuple[int, int],
                    neighbor: tuple[int, int]) -> str:
+    """Find which direction to go depending on how we move.
+
+    Args:
+        curr_cell (tuple[int, int]): current cell
+        neighbor (tuple[int, int]): cell we are moving into
+
+    Returns:
+        str: cardinal direction we move to
+    """
     if curr_cell[0] != neighbor[0]:
         return 'W' if curr_cell[0] - 1 == neighbor[0] else 'E'
     elif curr_cell[1] != neighbor[1]:
         return 'N' if curr_cell[1] - 1 == neighbor[1] else 'S'
+    return ''
 
 
 def is_blocked(maze: Maze, curr_cell: tuple[int, int],
-               neighbor: tuple[int, int]) -> bool:
+               neighbor: tuple[int, int]) -> int:
+    """Check if a cell is blocked by a wall.
+
+    Args:
+        maze (Maze): Maze object
+        curr_cell (tuple[int, int]): current cell
+        neighbor (tuple[int, int]): prospective cell to moce into
+
+    Returns:
+        bool: True if there wall, False if there is not
+    """
     direction: str = find_direction(curr_cell, neighbor)
     cell: int = int(maze.grid[curr_cell[1]][curr_cell[0]])
 
@@ -37,6 +77,7 @@ def is_blocked(maze: Maze, curr_cell: tuple[int, int],
         return (cell & 0b0100)
     elif direction == 'W':
         return (cell & 0b1000)
+    return 0
 
 
 def _produce_neighbors(maze: Maze, start: tuple) -> list[tuple]:
@@ -54,12 +95,26 @@ def _produce_neighbors(maze: Maze, start: tuple) -> list[tuple]:
     x: int = start[0]
     y: int = start[1]
     candidates = [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]
-    return [(nx, ny) for nx, ny in candidates
-            if nx >= 0 and nx < maze.width and ny >= 0 and ny < maze.height
-            and (nx, ny) not in maze.coords_42]
+    if maze.coords_42 is not None:
+        return [(nx, ny) for nx, ny in candidates
+                if nx >= 0 and nx < maze.width and ny >= 0 and ny < maze.height
+                and (nx, ny) not in maze.coords_42]
+    else:
+        return [(nx, ny) for nx, ny in candidates
+                if nx >= 0 and nx < maze.width
+                and ny >= 0 and ny < maze.height]
 
 
-def solve_maze(maze: Maze) -> list[tuple]:
+def solve_maze(maze: Maze) -> list[str]:
+    """Main body for the a* solving algorithm
+
+    Args:
+        maze (Maze): maze object
+
+    Returns:
+        list[tuple]: the path from start to finish
+            with the coordinates to follow.
+    """
     h: int = (abs(maze.exit[0] - maze.entry[0])
               + abs(maze.exit[1] - maze.entry[1]))
     open: dict[tuple[int, int], Node] = {maze.entry: Node(maze.entry, h=h)}
@@ -67,12 +122,12 @@ def solve_maze(maze: Maze) -> list[tuple]:
 
     while 1 == 1:
         lowest_f_node: Node = open[list(open.keys())[0]]
-        for node in open:
-            if open[node].f < lowest_f_node.f:
-                lowest_f_node = open[node]
-            elif (open[node].f == lowest_f_node.f
-                  and open[node].g > lowest_f_node.g):
-                lowest_f_node = open[node]
+        for key in open:
+            if open[key].f < lowest_f_node.f:
+                lowest_f_node = open[key]
+            elif (open[key].f == lowest_f_node.f
+                  and open[key].g > lowest_f_node.g):
+                lowest_f_node = open[key]
 
         closed.update({lowest_f_node.current_cell: lowest_f_node})
         del open[lowest_f_node.current_cell]
@@ -88,9 +143,9 @@ def solve_maze(maze: Maze) -> list[tuple]:
 
         for n in neighbors:
             tent_g: int = lowest_f_node.g + 1
-            nodes: list[tuple] = [open[node].current_cell for node in open]
-            h: int = abs(maze.exit[0] - n[0]) + abs(maze.exit[1] - n[1])
-            node: Node = Node(n, tent_g, h, current)
+            nodes: list[tuple] = [open[node_c].current_cell for node_c in open]
+            h = abs(maze.exit[0] - n[0]) + abs(maze.exit[1] - n[1])
+            node = Node(n, tent_g, h, current)
             if n not in nodes:
                 open.update({node.current_cell: node})
             else:
@@ -100,6 +155,7 @@ def solve_maze(maze: Maze) -> list[tuple]:
 
     path: list[tuple[int, int]] = [current]
     while path[-1] != maze.entry:
+        assert lowest_f_node.parent is not None
         path.append(lowest_f_node.parent)
         lowest_f_node = closed[lowest_f_node.parent]
     path.reverse()
@@ -110,4 +166,4 @@ def solve_maze(maze: Maze) -> list[tuple]:
 
 
 if __name__ == "__main__":
-    print(is_blocked())
+    print()

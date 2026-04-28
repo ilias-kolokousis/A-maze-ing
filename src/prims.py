@@ -1,26 +1,9 @@
 #!/usr/bin/env python3
 
 import random
-from src.hunt_n_kill import print_state
 from src.maze_class import Maze
-from src.viz import Viz
+from src.viz import Viz, print_state, get_input
 from src.solve_maze import solve_maze
-
-
-def _get_x_y(maze: Maze) -> tuple[int]:
-    """Create a tuple with random values in the limits of our grid
-    to start creating the maze.
-
-    Args:
-        maze (Maze): our maze object holding all the attributes for size
-
-    Returns:
-        tuple[int]: a random point inside the grid. The order signifies
-        x and y respectively.
-    """
-    x: int = random.randint(0, maze.width - 1)
-    y: int = random.randint(0, maze.height - 1)
-    return (x, y)
 
 
 def _produce_neighbors(maze: Maze, start: tuple) -> list[tuple]:
@@ -38,9 +21,14 @@ def _produce_neighbors(maze: Maze, start: tuple) -> list[tuple]:
     x: int = start[0]
     y: int = start[1]
     candidates = [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]
-    return [(nx, ny) for nx, ny in candidates
-            if nx >= 0 and nx < maze.width and ny >= 0 and ny < maze.height
-            and (nx, ny) not in maze.coords_42]
+    if maze.coords_42 != (0, 0):
+        return [(nx, ny) for nx, ny in candidates
+                if nx >= 0 and nx < maze.width and ny >= 0 and ny < maze.height
+                and (nx, ny) not in maze.coords_42]
+    else:
+        return [(nx, ny) for nx, ny in candidates
+                if nx >= 0 and nx < maze.width
+                and ny >= 0 and ny < maze.height]
 
 
 def _carve_wall(maze: Maze, start: tuple[int],
@@ -72,46 +60,21 @@ def _carve_wall(maze: Maze, start: tuple[int],
 
 
 def str_to_tuple(s: str) -> tuple:
+    """Convert a string resembling a tuple to an actual
+    tuple object
+
+    Args:
+        s (str): string to convert to tuple
+
+    Returns:
+        tuple[int, int]: converted string to tuple
+    """
     lst = s.split(',')
     return (int(lst[0]), int(lst[1]))
 
 
-def generate_prim() -> None:
+def generate_prim(maze: Maze) -> None:
     """Utilise Prim's algorithm to generate a perfect maze"""
-    f = open(fd, 'r')
-
-    config = {}
-    with f:
-        for line in f:
-            line = line.strip().lower()
-            if '=' in line:
-                key, value = line.split('=', 1)
-                config[key.strip()] = value.strip()
-
-    try:
-        if 'seed' not in config:
-            seed = 999999999
-        else:
-            seed = int(config['seed'])
-    except ValueError:
-        print(f"Error: 'seed' must be an integer, got '{config['seed']}'")
-        return
-
-    try:
-        start_cell = str_to_tuple(config['entry'])
-    except (ValueError, TypeError):
-        print(f"Error: 'entry' has an invalid format, got '{config['entry']}'")
-        return
-
-    if not (0 <= start_cell[0] < width and 0 <= start_cell[1] < height):
-        print(
-            f"Error: Entry point {start_cell} is out of "
-            f"bounds for maze of size {width}x{height}"
-        )
-        return
-    
-    maze: Maze = Maze('custom_config.ini')
-
     visited: set[tuple] = {}
 
     try:
@@ -157,7 +120,9 @@ def generate_prim() -> None:
         f.write(output)
 
     print("\033[H", end="", flush=True)
-    render(create_grid(maze.output_file))
+    viz: Viz = Viz(maze.output_file, maze.coords_42)
+    viz.render(viz.output)
+    get_input(maze)
 
 
 if __name__ == "__main__":

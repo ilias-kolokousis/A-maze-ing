@@ -2,6 +2,15 @@ import random
 
 
 def coord_str_to_tuple(s: str) -> tuple[int, int]:
+    """Convert a string resembling a tuple to an actual
+    tuple object
+
+    Args:
+        s (str): string to convert to tuple
+
+    Returns:
+        tuple[int, int]: converted string to tuple
+    """
     lst = s.split(',')
     return (int(lst[0]), int(lst[1]))
 
@@ -188,10 +197,8 @@ def generate_seed_config(seed: int) -> None:
 
     if coords is None:
         coords_list: list = []
-        coord_42: str = ""
     else:
-        coords_list: list = coords[0]
-        coord_42: str = coords[1]
+        coords_list = coords[0]
 
     entry: str = get_entry(width, height, coords_list)
     exit: str = get_exit(width, height, coords_list, entry)
@@ -207,7 +214,6 @@ def generate_seed_config(seed: int) -> None:
             f.write(f"exit = {exit}\n")
             f.write(f"output_file = {output}\n")
             f.write(f"perfect = {perfect}\n")
-            f.write(f"42_coords = {coord_42}\n")
     except PermissionError:
         print("Error: No permission to write to './custom_config.txt'")
         return
@@ -270,7 +276,7 @@ def generate_random_config() -> bool:
             exit()
         return False
     else:
-        go_again: str = input(
+        go_again = input(
             'Could not understand your input, do you want to retry? (y/n)'
         )
         if (go_again == 'y' or go_again == 'yes' or go_again == 'YES'):

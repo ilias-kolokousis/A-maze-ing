@@ -2,9 +2,12 @@
 
 import random
 from typing import Callable, TypeAlias
-from src.configuration.configuration import plot_42
+# from typing import SupportsInt, SupportsIndex
+# from typing import SupportsTrunc
+from src.configuration import plot_42
 
 BitOp: TypeAlias = Callable[[int], int]
+# UnType: TypeAlias = str | SupportsInt | SupportsIndex
 
 
 class Maze():
@@ -33,22 +36,28 @@ class Maze():
         Args:
             config_path (str): path to the config.ini file
         """
-        self.seed: int = int(config.get('seed'))
+        try:
+            seed_val = config.get('seed')
+            if seed_val is None:
+                raise ValueError
+            self.seed: int | None = int(seed_val)
+        except ValueError:
+            self.seed = None
         if self.seed is not None:
             random.seed(int(self.seed))
-        self.width: int = int(config.get('width'))
-        self.height: int = int(config.get('height'))
-        self.entry: tuple[int, ...] = tuple(
-            int(x) for x in config.get('entry').split(','))
-        self.exit: tuple[int, ...] = tuple(
-            int(x) for x in config.get('exit').split(','))
-        self.output_file: str = config.get('output_file')
-        self.perfect: bool = config.get('perfect').lower() == 'true'
+        self.width: int = int(config['width'])
+        self.height: int = int(config['height'])
+        parts = config['entry'].split(',')
+        self.entry: tuple[int, int] = (int(parts[0]), int(parts[1]))
+        parts = config['exit'].split(',')
+        self.exit: tuple[int, int] = (int(parts[0]), int(parts[1]))
+        self.output_file: str = config['output_file']
+        self.perfect: bool = config['perfect'].lower() == 'true'
         self.grid: list[list[int]] = [[15 for w in range(self.width)]
                                       for h in range(self.height)]
 
     @property
-    def coords_42(self) -> list[tuple[int, ...]] | None:
+    def coords_42(self) -> list[tuple[int, int]] | None:
         """Set the coordinates for the 42 graphic
 
         Returns:
@@ -65,11 +74,17 @@ class Maze():
 
     def grid_init(self) -> None:
         """Initiliaze the grid if needed"""
-        self.grid: list[list[int]] = [[15 for w in range(self.width)]
-                                      for h in range(self.height)]
+        self.grid = [[15 for w in range(self.width)]
+                     for h in range(self.height)]
 
 
 def tester(maze: Maze) -> None:
+    """Test if all the Maze attributes have been correctly
+    initialized. Used for debugging.
+
+    Args:
+        maze (Maze): Maze object
+    """
     for key, value in maze.__dict__.items():
         if key == 'grid':
             initialized: bool = all(all(x == 15 for x in i) for i in value)
@@ -84,15 +99,4 @@ def tester(maze: Maze) -> None:
 
 
 if __name__ == '__main__':
-    maze: Maze = Maze('custom_config.ini')
-    for key, value in maze.__dict__.items():
-        if key == 'grid':
-            initialized: bool = all(all(x == 15 for x in i) for i in value)
-            correct_size: bool = (len(value) == maze.height
-                                  and all(len(x) == maze.width
-                                          for x in value))
-            print("Grid initialized and"
-                  f" correct size: {initialized and correct_size}")
-        else:
-            print(f'{key}: {value}')
-    print(f'coords_42: {maze.coords_42}')
+    print()

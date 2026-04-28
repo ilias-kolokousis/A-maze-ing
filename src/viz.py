@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
 from src.maze_class import Maze
-from hunt_n_kill import create_maze
 from time import sleep
 
 
 class Viz():
+    """Visualization class to visualize a Maze object"""
     COLORS: dict[str, str] = {'Black': '\033[40m',
                               'Red': '\033[41m',
                               'Green': '\033[42m',
@@ -39,7 +39,15 @@ class Viz():
             'coord':  COLORS['Cyan']
         }
 
-    def __init__(self, path: str, coords_42: list[tuple[int, int]]) -> None:
+    def __init__(self, path: str,
+                 coords_42: list[tuple[int, int]] | None) -> None:
+        """Initiliaze a Viz object to visualize a Maze object
+
+        Args:
+            path (str): file path to the output file containing hex encoding
+            coords_42 (list[tuple[int, int]]): a list of coordinates
+                to render the 42 graphic in the center.
+        """
         self.output_path: str = path
         with open(self.output_path, 'r') as f:
             self.maze: str = f.read()
@@ -47,10 +55,15 @@ class Viz():
         self.width: int = len(self.maze.split('\n')[0])
         self.height: int = len(self.maze.split('\n')[:-3]) - 1
         self.path: str = self.maze.split('\n')[-1]
-        self.coords_42: list[tuple[int, int]] = coords_42
+        self.coords_42: list[tuple[int, int]] | None = coords_42
 
     @property
     def start(self) -> tuple[int, int]:
+        """start attribute.
+
+        Returns:
+            tuple[int, int]: coordinates for start
+        """
         start_raw: tuple = tuple(
             int(i)
             for i in self.maze.split('\n')[-3].split(',')
@@ -59,6 +72,11 @@ class Viz():
 
     @property
     def end(self) -> tuple[int, int]:
+        """end attribute.
+
+        Returns:
+            tuple[int, int]: coordinates for end
+        """
         end_raw: tuple = tuple(
             int(i)
             for i in self.maze.split('\n')[-2].split(',')
@@ -67,6 +85,15 @@ class Viz():
 
     def create_paths_in_rows(self, output: list[list[str]],
                              width: int) -> list[list[str]]:
+        """Create paths in the rows.
+
+        Args:
+            output (list[list[str]]): the grid
+            width (int): width
+
+        Returns:
+            list[list[str]]: a grid transformed for paths
+        """
         for row in range(len(output)):
             if row % 2 == 0:
                 visual_width = width * 2
@@ -82,6 +109,14 @@ class Viz():
 
     def create_paths_in_columns(self,
                                 output: list[list[str]]) -> list[list[str]]:
+        """Create paths vertically.
+
+        Args:
+            output (list[list[str]]): the grid
+
+        Returns:
+            list[list[str]]: the grid transformed with paths
+        """
         for row in range(len(output)):
             for cell in range(len(output[row])):
                 if output[row][cell] not in self.HEX_TO_BIN:
@@ -94,6 +129,11 @@ class Viz():
         return output
 
     def create_walls_and_paths(self) -> list[list[str]]:
+        """Create walls and paths for the whole grid
+
+        Returns:
+            list[list[str]]: the grid transformed with walls and paths
+        """
         maze_lst: list = [interchange_list_element(list(row), 'wall',
                                                    self.width)
                           for row in self.maze.split('\n')[:-4]]
@@ -105,14 +145,25 @@ class Viz():
 
     @property
     def output(self) -> list[list[str]]:
+        """the grid attribute with the solution excluded
+
+        Returns:
+            list[list[str]]: the grid
+        """
         output: list[list[str]] = self.create_walls_and_paths()
-        for coord in self.coords_42:
-            output[coord[1] * 2 + 1][coord[0] * 2 + 1] = 'coord'
+        if self.coords_42 is not None:
+            for coord in self.coords_42:
+                output[coord[1] * 2 + 1][coord[0] * 2 + 1] = 'coord'
         output[self.start[1]][self.start[0]] = 'start'
         output[self.end[1]][self.end[0]] = 'end'
         return output
 
     def create_solution_path(self) -> list[list[str]]:
+        """Create a path for the solution
+
+        Returns:
+            list[list[str]]: a list of coordinates with the path
+        """
         grid: list[list[str]] = [row[:] for row in self.output]
         current_cell: tuple = self.start[:]
         for direction in self.path:
@@ -135,9 +186,19 @@ class Viz():
 
     @property
     def output_w_solution(self) -> list[list[str]]:
+        """The grid with the solution path included
+
+        Returns:
+            list[list[str]]: the grid with the solution
+        """
         return self.create_solution_path()
 
     def render(self, output: list[list[str]]) -> None:
+        """Render the visualization
+
+        Args:
+            output (list[list[str]]): the grid
+        """
         RESET = '\033[0m'
         for row in output:
             print(''.join(f"{self.CELL_COLORS[cell]}  {RESET}" for cell in row
@@ -146,6 +207,16 @@ class Viz():
 
 def interchange_list_element(src_lst: list,
                              element: str | list, size: int) -> list:
+    """Put elements inbetween of other list elements.
+
+    Args:
+        src_lst (list): the original list
+        element (str | list): the element to but inbetween
+        size (int): how big the list is
+
+    Returns:
+        list: the transformed list
+    """
     output: list = []
     i: int = 0
     for row in range(size * 2):
@@ -164,6 +235,8 @@ def get_input(maze: Maze, solution_rendered: bool = False) -> None:
     Args:
         maze (Maze): maze object
         solution_rendered (bool): checks if solution path is showing"""
+    from src.hunt_n_kill import generate_hunt_n_kill
+    from src.prims import generate_prim
     print("=== A-Maze-ing ==="
           "\n\t1. Regenerate a new maze"
           "\n\t2. Show/Hide path from entry to exit"
@@ -174,9 +247,9 @@ def get_input(maze: Maze, solution_rendered: bool = False) -> None:
         print("\033[2J\033[H", end="", flush=True)
         maze.grid_init()
         if maze.perfect:
-            print("Prim's algo")
+            generate_prim(maze)
         else:
-            create_maze(maze)
+            generate_hunt_n_kill(maze)
     elif choice == '2':
         viz: Viz = Viz(maze.output_file, maze.coords_42)
         if solution_rendered:
@@ -188,7 +261,7 @@ def get_input(maze: Maze, solution_rendered: bool = False) -> None:
             viz.render(viz.output_w_solution)
             get_input(maze, True)
     elif choice == '3':
-        viz: Viz = Viz(maze.output_file, maze.coords_42)
+        viz = Viz(maze.output_file, maze.coords_42)
         print("==========")
         print("Choose the # corresponding to the desired color:"
               "\n\t1. Black"
@@ -255,7 +328,7 @@ def get_input(maze: Maze, solution_rendered: bool = False) -> None:
         return
     else:
         print("\033[2J\033[H", end="", flush=True)
-        viz: Viz = Viz(maze.output_file, maze.coords_42)
+        viz = Viz(maze.output_file, maze.coords_42)
         if solution_rendered:
             viz.render(viz.output_w_solution)
             print(
@@ -276,17 +349,18 @@ def create_output_file(maze: Maze) -> None:
     Args:
         maze (Maze): Maze class that has all relevant attributes
     """
-    grid: list[list[str]] = [row[:] for row in maze.grid]
     entry: str = f'{maze.entry[0]},{maze.entry[1]}'
     exit: str = f'{maze.exit[0]},{maze.exit[1]}'
 
+    grid_str: list[list[str]] = [[''] * maze.width for _ in range(maze.height)]
+
     for row in range(maze.height):
         for cell in range(maze.width):
-            grid[row][cell] = str(hex(maze.grid[row][cell]))[2:].upper()
+            grid_str[row][cell] = str(hex(maze.grid[row][cell]))[2:].upper()
 
     output: str = ''
-    for row in grid:
-        output += ''.join(row) + '\n'
+    for r in grid_str:
+        output += ''.join(r) + '\n'
     output += f'\n{entry}\n{exit}\n'
     with open(maze.output_file, 'w') as f:
         f.write(output)
