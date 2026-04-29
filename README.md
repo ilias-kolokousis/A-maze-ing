@@ -1,266 +1,129 @@
+_This project has been created as part of the 42 curriculum by <ikolokou>, <lvan-hem>_
+
 # A-Maze-ing
 
-## Algorithms used for maze generation:
+## Description
+A Python-based maze generator that produces mazes from a simple configuration file, encoding the result in a hexadecimal wall representation format.
 
-### **Prim's Algorithm:**
-- Subgraph connecting all vertices
-- No cycles
-- Always looks for minimum cost
-- The MST of N vertices has N - 1 edges, an extra edge will cause a cycle
+### Overview
+The program takes a configuration file as input and generates a maze according to the specified parameters. It supports both perfect and imperfect mazes. Any maze can be reproduced exactly by providing the same seed value.
+Each cell in the output is encoded as a single hexadecimal digit, where each bit represents the presence or absence of a wall on a given side (North, East, South, West). The output file contains the full grid, the entry and exit coordinates, and the shortest path between them expressed as a cardinal direction sequence.
+All generated mazes embed a "42" pattern formed by fully enclosed cells — omitted with a warning if the maze dimensions are too small to accommodate it.
 
-**How it works:**
-- Start from any vertex
-- Select the edge with the smallest weight at each step
-- Repeat the second step until all vertices are connected (N - 1 edges)
+### Constraints
+- No open area may exceed 2 cells in width or height — large rooms are not permitted
+- Shared walls between adjacent cells must be consistent across both cells
+- Entry and exit must be distinct and lie within the maze bounds
+- The outer border is fully walled.
+- In perfect mode, the maze is guaranteed to contain exactly one path from entry to exit
 
-**Required data structures:**
-- Visited Set: []
-    Keeps track of visited vertices
-- Min Heap
-    A priority queue, to efficiently select the edge with the smalles weight at each step
-- MST List
-    A list to store the edges to make up the final minimum spanning tree
 
-**How the algorithm works:**
-- Loop through all the edges, and for every vertex, store a list of tupils 
-    containing the edge's weight and its neighbouring vertex
-- Create a set called nodes, to keep track of all the unique vertices in the graph
+## Instructions
+The program can be run, by running the command _make run_. This will utilise the Makefile, and launch the program.
 
-- *Initialize four variables:*
-    - visited = set()   : A set to track visited vertices
-    - mst = []          : A list to store the edges included in the minimum spanning tree
-    - total_weight = 0  : A variable to accumulate the total weight of the spanning tree
-    - min_heap = []     : A priority queue to select the next edge with the smallest weight
+_make run_ is dependent on _make install_. This command will run automatically when you run _make run_. 
 
-- *Choose any starting point:*
-    start = edges [0][0]
-- *Mark starting point as visited:*
-    visited.add(start)
-- *Add all edges eminating from this starting vertex to min_heap:*
-    for weight, neighbour in graph[start]:
-        heapq.heappush(min_heap, (weight, start, neighbour))
+If you want to clean up the source directory of the program, run _make clean_.
 
-- The main loop starts running
-    and the loop continues as long as the min-heap isn't empty
-        and mst of N vertices is smaller than N - 1
+A list of all the make commands:
 
-- *Each iteration:*
-    - Pop the edge with the smallest weight from the priority queue
-    - If vertex hasn't been visited, mark is as visited
-        else, continue to the next vertex in min_heap
-    - Add the edge to the spanning tree,
-        and update the total weight
-    - Add all new edges to the priority queue
-        provided they connect to unvisited vertices
+- _make install_
+ Installs all requirements that are present in the requirements.txt file. It also installs venv (Virtual Environment)
+ __Requirements:__
+ - annotated-types==0.7.0
+ - flake8==7.3.0
+ - librt==0.9.0
+ - mccabe==0.7.0
+ - mypy==1.20.2
+ - mypy_extensions==1.1.0
+ - pathspec==1.1.1
+ - pycodestyle==2.14.0
+ - pydantic==2.11.0
+ - pydantic-settings==2.14.0
+ - pydantic_core==2.33.0
+ - pyflakes==3.4.0
+ - python-dotenv==1.2.2
+ - typing-inspection==0.4.2
+ - typing_extensions==4.15.0
 
-**When N - 1 edges have been reached, the function returns the list with edges in the tree,**
-    **along with the total weight**
+- _make run_
+ Checks if all the requirements are installed, then launches the program when they are. It runs it from a virtual environment installed in the root.
 
-```python
-import heapq
-from collcections import defaultdict
+- _make debug_
+ Runs programm with Python debugger (pdb)
 
-def prim(edges):
-    graph = defaultdict(list)
-    nodes = set()
-    for u, v, w in edges:
-        graph[u].append((w, v))
-        graph[v].append((w, u))
-        nodes.update([u, v])
-    
-    visited = set()
-    mst = []
-    total_weight = 0
-    min_heap = []
+- _make lint_
+ Checks for flake8 and mypy errors in the source code.
 
-    start = edges[0][0]
-    visited.add(start)
-    for weight, neighbour in graph[start]:
-        heapq.heappush(min_heap, (weight, start, neighbour))
-    
-    while min_heap and len(mst) < len(nodes) - 1:
-        weight, u, v = heapq.heappop(min_heap)
-        if v not in visited:
-            visited.add(v)
-            mst.append((u, v, weight))
-            total_weight += weight
-            for next_weight, neighbour in graph[v]:
-                if neighbour not in visited:
-                    heapq.heappush(min_heap, (next_weight, v, neighbour))
+- _make lint-strict_
+ Checks for flake8 and mypy errors, with the flag --strict for mypy. (Optional)
 
-    return mst, total_weight
-```
+- _make clean_
+ Deletes all files created during runtime, as well as pychaches.
 
-### **Kruskal's Algorithm:**
-- Similar to Prim's algorithm
-- A greedy algorithm, that in each step adds to the forest 
-    the lowest weight edge that will not form a cycle
-- Key steps are sorting, and the use of a disjoint-set data structure to detect cycles
 
-**How the algorithm works:**
-- Create a forest (a set of trees) initially consisting of a 
-    seperate single-vertex tree for each vertex in the nput graph
-- Sort the graph edges by weight
-- Loop through the edges of the graph, in ascending order by their weight
-    For each edge:
-    - Test wether adding the edge to the current forest would create a cycle
-    - If not, add the edge to the forest, combining two trees into as single tree
+## Resources
 
-### **Kruskal vs Prim**
-|Feature|Prim's Algorithm|Kruskal's Algorithm|
-|-------|----------------|-------------------|
-|'Approach'|Vertex-based, grows the MST one vertex at a time|Edge based, adds edges in increasing order of weight|
-|'Data structure'|Priority queue (min-heap)|Union-Find data structur|
-|'Graph representation'|Adjacency matrix or adjacency list|Edge list|
-|'Initialization'|Starts from an arbitrary vertex|Starts with all vertices as separate trees (forest)|
-|'Edge selection'|Chooses the minimum weight edge from the connected vertices|Chooses the minimum weight edge from all edges|
-|'Cycle management'|Not explicitly managed; grows connected component|Uses Union-Find to avoid cycles|
-|'Complexity'|O(V^2) for adjacency matrix, O((E + V) log V) with a priority queue|O(E log E) or O(E log V), due to edge sorting|
-|'Suitable for'|Dense graphs|Sparse graphs|
-|'Implementation complexity'|Relatively simpler in dense graphs|More complex due to cycle management|
-|'Parallelism'|Difficult to parallelize|Easier to parallelize edge sorting and union operations|
-|'Memory usage'|More memory for priority queue|Less memory of edges can be sorted externally|
-|'Example use cases'|Network design, clustering with dense connections|Road networks, telecommunications with sparse connections|
-|'Starting point'|Requires a starting vertex|No specific starting point, operates on global edges|
-|'Optimal for'|Dense graphs where adjacency list is used|Sparse graphs where edge list is efficient|
+### References
+- Python Makefile: https://earthly.dev/blog/python-makefile/
 
-### **Backtracking Algorithm**
-**Backtracking algorithms** are strategies that help explore different options to find the solution.
-- Work by tring out different paths and if one doen't work, then backtrack and try another until the right one is found. 
-    Its like solving a puzzle by testing different pieces until they fit together perfectly
-- Useful for problems where you must generate all valid combinations, permutations, or subsets under constraints
+- Prims algorithm: https://www.youtube.com/watch?v=20QfaLQPLqQ
 
-*How does a backtracking algorithm work?*
-A backtracking algorithm works by recursively exploring all pssible solutions to a problem. It starts by choosing an initial solution, and then it explores all possible extensions of that solution. If an extension leads to a solution, the algorithm returns that solution. If an extension does not lead to a solution, the algorithm backtracks to the previous solution and tries a different extension.
+- Maze generation algorithms: https://www.youtube.com/watch?v=ioUl1M77hww
 
-**A general outline of how a backtracking algorithm works:**
-1. Choose an initial solution
-2. Explore all possible extensions of the current solution
-3. If an extension leads to a solution, return that solution
-4. If an extension doesn't lead to a solution, backtrack to the previous solution and try a different extension.
-5. Repeat steps 2-4 until all possible solutions have been explored.
+- Prims and Kruskals algorithm: https://www.geeksforgeeks.org/dsa/difference-between-prims-and-kruskals-algorithm-for-mst/
 
-### **Depth First Search (DFS)**
-Also known as the backtracking maze.
+### AI Usage
+Claude Sonnet 4.6 has been used to discuss different forms of implementation, and to answer questions about Makefile and Python syntaxes. It also helped cleaning up mypy errors. 
 
-*How it is generated*
-1. Start with a grid where every cell is surrounded by walls
-2.  - Select a random starting cell
-    - Mark it as visited
-    - Look at neighbouring cells
-3. Select a random unvisited neighbour
-4.  - Go to the selected cell
-    - Mark it as visited
-    - Remove the wall between current and previous cell
-5. If there is no unvisited cell:
-    1. Backtrack to previous cell
-    2. Repeat until an unvisited neighbour cell is found
-6. Repeat step 3-5 until all cells are visited
 
-### **Hunt and Kill Algorithm**
+## Config file
+seed=0
+width=20
+height=20
+entry=0,0
+exit=19,19
+output_file=maze.txt
+perfect=true
 
-*How it is generated*
-1. Start with a grid where every cell is surrounded by walls
-2.  - Select a random starting cell
-    - Mark it as visited
-    - Look at neighbouring cells
-3. Select a random unvisited neighbour
-4.  - Go to the selected cell
-    - Mark it as visited
-    - Remove the wall between current and previous cell
-5. Repeat steps 3 and 4, until there is no unvisited neighbour cell
-6. If there is no unvisited neighbour cell:
-    1. Iterate through the visited cell
-    2. Stop when found a cell with an unvisited neighbour
-    3. Select this cell, and continue starting at step 3
-7. Repeat until all cells are visited
+This default config file gives entry and exit, as well as the size and if its a perfect maze. 
 
-### **Prim's Algorithm to generate a Maze**
+A randomly generated maze will have a minimum size of 4x4, and a maximum size of 40x40.
 
-*How it is generated*
-1. Start with a grid where every cell is surrounded by walls
-2. Select random starting cell
-3. Add it walls to the list
-4. Select a random wall, and if it separates a new cell from a visited one, remove it.
-5. Repeat until all cells are visited
+7x9 is the minimum size for a maze to be generated with the 42 cells in the middle closed off.
 
-- Prim's Algorithm is ideal to generate a perfect maze
-- It ensures all cells are connected, but only one path from start to finish exists
+All parameters are randomised within certain limits e.g. entry cannot be same as exit and both will never be inside the 42 cells. Height cannot be more than width.
 
-## Seeded maze generation
-A seed ensures the same maze is generated everytime!
+The seed is generated first, and used to set parameters as well as generate the maze, so that the exact maze is reproducable with the seed.
 
-### random.seed() method
-The random.seed() method in Python is used to initialize the random number generator so that it produces the same squence of random numbers every time a program is run. By setting a fixed seed value, randomness becomes reproducible, which is essential for debugging, testing and scientific experiments.
 
-- Ensures consistent results across multiple executions
-- Helps in debugging and verifying program output
-- Supports reproducible experiments in machine learning and simulations
-- Useful for controlled randomness in game development and testing
+## Algorithms
+We decided to implement two algorithms: Prim's and Hunt-N-Kill.
 
-*Example:*
-```Python
-import random
+To generate a perfect maze, we utilised Prim's algorithm. We made this decision because Prim's algorithm always generates a perfect maze.
 
-for i in range(2):
-    print(random.randint(1, 1000))
+To generate an imperfect maze, we utilised Hunt-N-Kill algorithm, since its easily modifyable to create loops, thus creating an imperfect maze.
 
-for i in range(2):
-    random.seed(0)
-    print(random.randint(1, 1000))
-```
 
-**Output:**
+## Reusability
 
-*Without seed:*
-> - 21
-> - 537
 
-*With seed:*
-> - 865
-> - 865
 
-### Syntax
-> random.seed(a=None, version=2)
+## Project Managment
+The division of roles went very natural. We wrote down a list of tasks, and choose some tasks to do.
+We both wrote one algorithm, and the other parts of the project were divided.
 
-**Parameters:**
-- **a (optional):** it's the seed value (int, float, str, bytes or bytearray). If None, the system time is used
-- **version (optional):** default value is 2, using a more advanced seeding algorithm. version=1 uses an older method
+The project went according to plan, without sudden roadblocks. We came together to discuss code, and kept in contact.
 
-**Return type:**
-random.seed() method does not return any value
+What went well was the steady progress. Our project was under development the whole time.
 
-## Configuration file
-A configuration file is a plain text file used to store application settings and parameters in a readable format.
+What could've been improved was clearer meeting times. We did not really schedule specific dates/times always to discuss our code.
 
-- Settings are usually written as key-value pairs
-- The INI (initialization) format is popular because it is simple and easy to read
-- Python provides the configparser module to work with INI files
-- The module allows reading from and writing to configuration files efficiently
+Our tools used are:
+Slack - to communicate
+Github - to push code, and checkout the other person's code
 
-### Creating a configuration file in Python
-```Python
-import configparser
+## Advanced features
+Our maze generation utilises two different algorithms: Prim's and Hunt-N-Kill.
 
-def create_config():
-    config = configparser.ConfigParser()
-    config["DEFAULT"] = {
-        "SEED": None,
-        "WIDTH": 20,
-        "HEIGHT": 20,
-        "ENTRY": (0, 0),
-        "EXIT": (19, 19),
-        "OUTPUT_FILE": "maze.txt",
-        "PERFECT": True
-    }
-    with open('config.ini', 'w') as configfile:
-        config.write(configfile)
-
-if __name__ == "__main__":
-    create_config()
-```
-
-## Makefile
-
-**Good source:** https://earthly.dev/blog/python-makefile/
-
+Our maze generation is also visualised in real-time. 

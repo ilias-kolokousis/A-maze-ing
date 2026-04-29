@@ -15,7 +15,7 @@ run: install
 debug: install
 	@. $(VENV)/bin/activate
 	@clear
-	@$(PYTHON) -m pdb ./a_maze_ing.py
+	@$(PYTHON) -m pdb ./a_maze_ing.py default_config.txt
 
 lint:
 	@echo "\033[35mflake8\033[0m"
@@ -25,9 +25,9 @@ lint:
 
 lint-strict:
 	@echo "\033[35mflake8\033[0m"
-	@flake8 ./src
+	@flake8 . --exclude .venv
 	@echo "\033[35mmypy\033[0m"
-	@mypy --strict ./src
+	@mypy --strict . --exclude .venv
 
 clean:
 	@rm -rf ./src/configuration/conf_scripts/__pycache__
