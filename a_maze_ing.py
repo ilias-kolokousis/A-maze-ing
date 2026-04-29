@@ -3,7 +3,7 @@
 import src.configuration as conf
 from src.prims import generate_prim
 from src.hunt_n_kill import generate_hunt_n_kill
-from src.maze_class import Maze
+from src.maze_class import Maze, EntryExitInFortyTwo
 import os
 import sys
 
@@ -17,7 +17,7 @@ class InsufficientArgs(Exception):
     pass
 
 
-def handle_errors(config: dict[str, str | int | bool]) -> bool:
+def handle_errors(config: dict[str, str]) -> bool:
     """Handle errors for the following cases:
     1. Non integers in width and height
     2. Missing any of the mandatory keys
@@ -83,16 +83,19 @@ def handle_errors(config: dict[str, str | int | bool]) -> bool:
         return False
 
     try:
-        entry: list[str, str] = config['entry'].split(',')
-        exit: list[str, str] = config['exit'].split(',')
+        entry: list[str] = config['entry'].split(',')
+        exit: list[str] = config['exit'].split(',')
         [int(i) for i in entry]
         [int(i) for i in exit]
         if len(entry) != 2 or len(exit) != 2:
             raise ValueError
+        if entry == exit:
+            raise ValueError
     except ValueError:
         print(
             "Error: Values inside the entry and exit must be bare integers "
-            "and they must be exactly 2 each separated by a comma."
+            ", they must be exactly 2 each separated by a comma"
+            ", and they must be different."
             f"\nGot '{config['entry']}' and '{config['exit']}'",
             file=sys.stderr)
         return False
@@ -140,9 +143,9 @@ def choose_algo(fd: str) -> None:
 
     try:
         with open(config_path, 'r') as f:
-            config: dict[str, str | int | bool] = {}
+            config: dict[str, str] = {}
             for line in f:
-                line: str = line.strip().lower()
+                line = line.strip().lower()
                 if '=' in line:
                     key, value = line.split('=', 1)
                     config[key.strip()] = value.strip()
@@ -154,7 +157,11 @@ def choose_algo(fd: str) -> None:
         return
 
     perfect: bool = config['perfect'].lower() == 'true'
-    maze: Maze = Maze(config)
+    try:
+        maze: Maze = Maze(config)
+    except EntryExitInFortyTwo:
+        print("Entry or exit is inside the 42 graphic."
+              "\nPlease try different entry or exit coordinates.")
 
     if perfect:
         generate_prim(maze)

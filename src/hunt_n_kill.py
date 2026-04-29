@@ -6,7 +6,7 @@ from src.solve_maze import solve_maze
 from src.viz import Viz, get_input, print_state
 
 
-def _get_x_y(maze: Maze) -> tuple[int]:
+def _get_x_y(maze: Maze) -> tuple[int, int]:
     """Create a tuple with random values in the limits of our grid
     to start creating the maze.
 
@@ -14,7 +14,7 @@ def _get_x_y(maze: Maze) -> tuple[int]:
         maze (Maze): our maze object holding all the attributes for size
 
     Returns:
-        tuple[int]: a random point inside the grid. The order signifies
+        tuple[int, int]: a random point inside the grid. The order signifies
         x and y respectively.
     """
     x: int = random.randint(0, maze.width - 1)
@@ -47,8 +47,8 @@ def _produce_neighbors(maze: Maze, start: tuple) -> list[tuple]:
                 and ny >= 0 and ny < maze.height]
 
 
-def _carve_wall(maze: Maze, start: tuple[int],
-                next_cell: tuple[int]) -> None:
+def _carve_wall(maze: Maze, start: tuple[int, int],
+                next_cell: tuple[int, int]) -> None:
     """Open up a path between two cells, i.e. converts the bit needed of
     the cell to 0. Bits are following this order, WSEN, and 1 means wall
     and 0 means no wall. It modifies the grid in-place.
@@ -66,7 +66,7 @@ def _carve_wall(maze: Maze, start: tuple[int],
     if start[0] != next_cell[0]:
         dir: str = 'W' if start[0] - 1 == next_cell[0] else 'E'
     elif start[1] != next_cell[1]:
-        dir: str = 'N' if start[1] - 1 == next_cell[1] else 'S'
+        dir = 'N' if start[1] - 1 == next_cell[1] else 'S'
 
     maze.grid[start[1]][start[0]] = maze.change_bit[dir](
         maze.grid[start[1]][start[0]])
@@ -75,7 +75,7 @@ def _carve_wall(maze: Maze, start: tuple[int],
         maze.grid[next_cell[1]][next_cell[0]])
 
 
-def _hunt(maze: Maze, start: tuple[int], visited: set[tuple]) -> tuple:
+def _hunt(maze: Maze, start: tuple[int, int], visited: set[tuple]) -> tuple:
     """Part of the hunt and kill process. Find an invisited cell when we have
     exhausted the possible neighbors we can move into and we need to hunt an
     unvisited cell.
@@ -115,7 +115,7 @@ def _hunt(maze: Maze, start: tuple[int], visited: set[tuple]) -> tuple:
         if cell_found:
             break
 
-    next_cell: tuple[int] = random.choice(neighbors)
+    next_cell: tuple[int, int] = random.choice(neighbors)
     while next_cell not in visited:
         next_cell = random.choice(neighbors)
     visited.add(start)
@@ -136,7 +136,7 @@ def _kill(maze: Maze, start: tuple, visited: set[tuple]) -> tuple:
         tuple: the next cell coordinates
     """
     neighbors: list[tuple] = _produce_neighbors(maze, start)
-    next_cell: tuple[int] = random.choice(neighbors)
+    next_cell: tuple[int, int] = random.choice(neighbors)
     if all(n in visited for n in neighbors):
         return start
     if random.choices([False, True], weights=(50, 50), k=1)[0]:
@@ -155,14 +155,14 @@ def generate_hunt_n_kill(maze: Maze) -> None:
     visited) or finds a cell that is unvisited and starts from there
     carving new walls.
     """
-    start: tuple[int] = _get_x_y(maze)
+    start: tuple[int, int] = _get_x_y(maze)
     if maze.coords_42 is not None:
         while start in maze.coords_42:
             start = _get_x_y(maze)
     visited: set[tuple] = {start}
 
     print("\033[2J\033[H", end="", flush=True)
-    if maze.coords_42 != (0, 0):
+    if maze.coords_42 is not None:
         while len(visited) + len(maze.coords_42) < maze.width * maze.height:
             print_state(maze)
             neighbors: list[tuple] = _produce_neighbors(maze, start)
@@ -173,24 +173,23 @@ def generate_hunt_n_kill(maze: Maze) -> None:
     else:
         while len(visited) < maze.width * maze.height:
             print_state(maze)
-            neighbors: list[tuple] = _produce_neighbors(maze, start)
+            neighbors = _produce_neighbors(maze, start)
 
             if all(n in visited for n in neighbors):
                 start = _hunt(maze, start, visited)
             start = _kill(maze, start, visited)
 
     print_state(maze)
-    grid: list[list[str]] = [row[:] for row in maze.grid]
     entry: str = f'{maze.entry[0]},{maze.entry[1]}'
     exit: str = f'{maze.exit[0]},{maze.exit[1]}'
     path: str = ''.join(solve_maze(maze))
 
-    for row in range(maze.height):
+    grid_str: list[list[str]] = [[''] * maze.width for _ in range(maze.height)]
+    for r in range(maze.height):
         for cell in range(maze.width):
-            grid[row][cell] = str(hex(maze.grid[row][cell]))[2:].upper()
-
+            grid_str[r][cell] = str(hex(maze.grid[r][cell]))[2:].upper()
     output: str = ''
-    for row in grid:
+    for row in grid_str:
         output += ''.join(row) + '\n'
     output += f'\n{entry}\n{exit}\n{path}'
     with open(maze.output_file, 'w') as f:
@@ -203,4 +202,4 @@ def generate_hunt_n_kill(maze: Maze) -> None:
 
 
 if __name__ == "__main__":
-    generate_hunt_n_kill()
+    print()

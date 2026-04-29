@@ -1,8 +1,0 @@
-seed = 319615299124025312
-width = 13
-height = 7
-entry = 11,3
-exit = 12,1
-output_file = output.txt
-perfect = False
-42_coords = 3,1:7,1:8,1:9,1:3,2:9,2:3,3:4,3:5,3:7,3:8,3:9,3:5,4:7,4:5,5:7,5:8,5:9,5

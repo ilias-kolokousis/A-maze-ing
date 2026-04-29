@@ -21,7 +21,7 @@ def _produce_neighbors(maze: Maze, start: tuple) -> list[tuple]:
     x: int = start[0]
     y: int = start[1]
     candidates = [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]
-    if maze.coords_42 != (0, 0):
+    if maze.coords_42 is not None:
         return [(nx, ny) for nx, ny in candidates
                 if nx >= 0 and nx < maze.width and ny >= 0 and ny < maze.height
                 and (nx, ny) not in maze.coords_42]
@@ -31,8 +31,8 @@ def _produce_neighbors(maze: Maze, start: tuple) -> list[tuple]:
                 and ny >= 0 and ny < maze.height]
 
 
-def _carve_wall(maze: Maze, start: tuple[int],
-                next_cell: tuple[int]) -> None:
+def _carve_wall(maze: Maze, start: tuple[int, int],
+                next_cell: tuple[int, int]) -> None:
     """Open up a path between two cells, i.e. converts the bit needed of
     the cell to 0. Bits are following this order, WSEN, and 1 means wall
     and 0 means no wall. It modifies the grid in-place.
@@ -50,7 +50,7 @@ def _carve_wall(maze: Maze, start: tuple[int],
     if start[0] != next_cell[0]:
         dir: str = 'W' if start[0] - 1 == next_cell[0] else 'E'
     elif start[1] != next_cell[1]:
-        dir: str = 'N' if start[1] - 1 == next_cell[1] else 'S'
+        dir = 'N' if start[1] - 1 == next_cell[1] else 'S'
 
     maze.grid[start[1]][start[0]] = maze.change_bit[dir](
         maze.grid[start[1]][start[0]])
@@ -75,11 +75,11 @@ def str_to_tuple(s: str) -> tuple:
 
 def generate_prim(maze: Maze) -> None:
     """Utilise Prim's algorithm to generate a perfect maze"""
-    visited: set[tuple] = {}
+    visited: set[tuple] = set()
 
-    try:
+    if maze.coords_42 is not None:
         visited = set(maze.coords_42)
-    except TypeError:
+    else:
         visited = set()
     visited.add(maze.entry)
 
@@ -103,17 +103,18 @@ def generate_prim(maze: Maze) -> None:
         print_state(maze)
     print_state(maze)
 
-    grid: list[list[str]] = [row[:] for row in maze.grid]
     entry: str = f'{maze.entry[0]},{maze.entry[1]}'
     exit: str = f'{maze.exit[0]},{maze.exit[1]}'
     path: str = ''.join(solve_maze(maze))
 
-    for row in range(maze.height):
+    grid_str: list[list[str]] = [[''] * maze.width for _ in range(maze.height)]
+
+    for r in range(maze.height):
         for cell in range(maze.width):
-            grid[row][cell] = str(hex(maze.grid[row][cell]))[2:].upper()
+            grid_str[r][cell] = str(hex(maze.grid[r][cell]))[2:].upper()
 
     output: str = ''
-    for row in grid:
+    for row in grid_str:
         output += ''.join(row) + '\n'
     output += f'\n{entry}\n{exit}\n{path}'
     with open(maze.output_file, 'w') as f:
@@ -126,4 +127,4 @@ def generate_prim(maze: Maze) -> None:
 
 
 if __name__ == "__main__":
-    generate_prim()
+    print()

@@ -2,12 +2,13 @@
 
 import random
 from typing import Callable, TypeAlias
-# from typing import SupportsInt, SupportsIndex
-# from typing import SupportsTrunc
 from src.configuration import plot_42
 
 BitOp: TypeAlias = Callable[[int], int]
-# UnType: TypeAlias = str | SupportsInt | SupportsIndex
+
+
+class EntryExitInFortyTwo(Exception):
+    pass
 
 
 class Maze():
@@ -70,7 +71,10 @@ class Maze():
         pad_left: int = (self.width - 8) // 2
         pad_top: int = (self.height - 5) // 2
 
-        return plot_42(pad_left, pad_top)
+        graphic: list[tuple[int, int]] = plot_42(pad_left, pad_top)
+        if self.entry in graphic or self.exit in graphic:
+            return None
+        return graphic
 
     def grid_init(self) -> None:
         """Initiliaze the grid if needed"""
