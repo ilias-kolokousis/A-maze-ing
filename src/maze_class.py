@@ -2,7 +2,7 @@
 
 import random
 from typing import Callable, TypeAlias
-from src.configuration import plot_42
+from mazegen_il_lu.src.configuration import plot_42
 
 BitOp: TypeAlias = Callable[[int], int]
 
@@ -103,4 +103,5 @@ def tester(maze: Maze) -> None:
 
 
 if __name__ == '__main__':
-    print()
+    import sys
+    print(sys.path)

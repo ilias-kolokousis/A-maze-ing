@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-from src.maze_class import Maze
 from time import sleep
 from sys import stderr
+from mazegen_il_lu.src.maze_class import Maze
 
 
 class Viz():
@@ -236,8 +236,8 @@ def get_input(maze: Maze, solution_rendered: bool = False) -> None:
     Args:
         maze (Maze): maze object
         solution_rendered (bool): checks if solution path is showing"""
-    from src.hunt_n_kill import generate_hunt_n_kill
-    from src.prims import generate_prim
+    from mazegen_il_lu.src.hunt_n_kill import generate_hunt_n_kill
+    from mazegen_il_lu.src.prims import generate_prim
 
     if maze.coords_42 is None:
         print("42 graphic has been omitted, because:"
@@ -394,4 +394,5 @@ def print_state(maze: Maze) -> None:
 
 
 if __name__ == "__main__":
-    print()
+    import sys
+    print(sys.path)

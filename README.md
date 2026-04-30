@@ -107,7 +107,29 @@ To generate an imperfect maze, we utilised Hunt-N-Kill algorithm, since its easi
 
 ## Reusability
 
+This project can be also isntalled with `pip install`. Steps:
 
+1. 
+```bash
+pip install a-maze-ing-generator-il-lu
+```
+2. Import it in your python project:
+```python 
+from mazegen_il_lu import MazeGenerator
+```
+3. Define a MazeGenerator class with the following attributes:
+	- seed (int), 
+	- width (int), 
+	- height(int), 
+	- entry(tuple[int, int]), 
+	- exit(tuple[int, int]), 
+	- output_file(str), 
+	- perfect(default False)
+
+4. Use the generate method to generate a maze.
+```python
+MazeGenerator(...).generate()
+```  
 
 ## Project Managment
 The division of roles went very natural. We wrote down a list of tasks, and choose some tasks to do.

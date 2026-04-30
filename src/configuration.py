@@ -259,14 +259,16 @@ def generate_random_config() -> bool:
             seed = random.randint(0, 999999999999999999)
             generate_seed_config(seed)
         else:
-            go_again = input('Could not understand your input, do you want to retry? (y/n)')
+            go_again = input('Could not understand your input,'
+                             ' do you want to retry? (y/n)')
             if (go_again == 'y' or go_again == 'yes' or go_again == 'YES'):
                 return generate_random_config()
             else:
                 exit()
         return False
     else:
-        go_again = input('Could not understand your input, do you want to retry? (y/n)')
+        go_again = input('Could not understand your input,'
+                         ' do you want to retry? (y/n)')
         if (go_again == 'y' or go_again == 'yes' or go_again == 'YES'):
             return generate_random_config()
         else:

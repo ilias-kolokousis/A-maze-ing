@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-import src.configuration as conf
-from src.prims import generate_prim
-from src.hunt_n_kill import generate_hunt_n_kill
-from src.maze_class import Maze, EntryExitInFortyTwo
+import mazegen_il_lu.src.configuration as conf
+from mazegen_il_lu.src.prims import generate_prim
+from mazegen_il_lu.src.hunt_n_kill import generate_hunt_n_kill
+from mazegen_il_lu.src.maze_class import Maze, EntryExitInFortyTwo
 import os
 import sys
 

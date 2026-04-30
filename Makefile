@@ -10,7 +10,7 @@ install: requirements.txt
 run: install
 	@. $(VENV)/bin/activate
 	@clear
-	@$(PYTHON) a_maze_ing.py default_config.txt
+	@PYTHONPATH=$(shell dirname $(PWD)) $(PYTHON) a_maze_ing.py default_config.txt
 
 debug: install
 	@. $(VENV)/bin/activate
@@ -19,15 +19,15 @@ debug: install
 
 lint:
 	@echo "\033[35mflake8\033[0m"
-	@flake8 . --exclude .venv
+	@flake8 . --exclude venv
 	@echo "\033[35mmypy\033[0m"
-	@mypy --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs . --exclude '.venv/'
+	@mypy --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs --explicit-package-bases . --exclude '\.venv'
 
 lint-strict:
 	@echo "\033[35mflake8\033[0m"
-	@flake8 . --exclude .venv
+	@flake8 . --exclude venv
 	@echo "\033[35mmypy\033[0m"
-	@mypy --strict . --exclude .venv
+	@mypy --strict . --exclude '\.venv'
 
 clean:
 	@rm -rf ./src/configuration/conf_scripts/__pycache__
@@ -37,5 +37,6 @@ clean:
 	@rm -rf ./custom_config.txt
 	@rm -rf maze.txt
 	@rm -rf __pycache__
+	@rm -rf .mypy_cache
 
 .PHONY: run clean
