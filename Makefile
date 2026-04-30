@@ -35,6 +35,7 @@ clean:
 	@rm -rf ./src/configuration/__pycache__
 	@rm -rf $(VENV)
 	@rm -rf ./custom_config.txt
-	@rm -rf output.txt
+	@rm -rf maze.txt
+	@rm -rf __pycache__
 
 .PHONY: run clean

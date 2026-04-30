@@ -191,8 +191,8 @@ def generate_seed_config(seed: int) -> None:
         Seed to be used in randomization
     """
     random.seed(seed)
-    width: int = random.randrange(4, 40)
-    height: int = random.randrange(4, width)
+    width: int = random.randrange(5, 30)
+    height: int = random.randrange(5, 30)
     coords: CoordResult | None = set_42_coords(width, height)
 
     if coords is None:
@@ -203,7 +203,7 @@ def generate_seed_config(seed: int) -> None:
     entry: str = get_entry(width, height, coords_list)
     exit: str = get_exit(width, height, coords_list, entry)
     perfect: bool = random.choice([True, False])
-    output: str = "output.txt"
+    output: str = "maze.txt"
 
     try:
         with open('custom_config.txt', 'w') as f:
@@ -231,7 +231,6 @@ def generate_random_config() -> bool:
         returns True when default settings should be used,
          and False when a custom config file should be used
     """
-    go_again: str = ''
     x: str = input('Use default settings? (y/n)      ')
     if (x == 'y' or x == 'yes' or x == 'YES'):
         return True
@@ -239,10 +238,6 @@ def generate_random_config() -> bool:
         is_seed: str = input('Use a seed? (y/n)      ')
         if (is_seed == 'y' or is_seed == 'yes' or is_seed == 'YES'):
             valid_seed: bool = False
-
-            # Get seed. If input is invalid, try 2 more times
-            # to get valid input. In the last try, produce a random seed.
-
             for i in range(3):
                 try:
                     seed: int = int(input('Seed:'))
@@ -260,28 +255,20 @@ def generate_random_config() -> bool:
             else:
                 seed = random.randint(0, 999999999999999999)
                 generate_seed_config(seed)
-        elif (
-            is_seed == 'n' or
-            is_seed == 'no' or is_seed == 'NO'
-        ):
+        elif (is_seed == 'n' or is_seed == 'no' or is_seed == 'NO'):
             seed = random.randint(0, 999999999999999999)
             generate_seed_config(seed)
         else:
-            go_again = input(
-                                  'Could not understand your input,'
-                                  'do you want to retry? (y/n)'
-                                )
-        if (go_again == 'y' or go_again == 'yes' or go_again == 'YES'):
-            generate_random_config()
-        else:
-            exit()
+            go_again = input('Could not understand your input, do you want to retry? (y/n)')
+            if (go_again == 'y' or go_again == 'yes' or go_again == 'YES'):
+                return generate_random_config()
+            else:
+                exit()
         return False
     else:
-        go_again = input(
-            'Could not understand your input, do you want to retry? (y/n)'
-        )
+        go_again = input('Could not understand your input, do you want to retry? (y/n)')
         if (go_again == 'y' or go_again == 'yes' or go_again == 'YES'):
-            generate_random_config()
+            return generate_random_config()
         else:
             exit()
     return False

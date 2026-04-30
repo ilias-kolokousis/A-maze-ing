@@ -2,6 +2,6 @@ seed=0
 width=20
 height=20
 entry=0,0
-exit=0,1
+exit=19,19
 output_file=maze.txt
 perfect=true
