@@ -245,6 +245,7 @@ def get_input(maze: Maze, solution_rendered: bool = False) -> None:
               " (needs to be at least 9x7)"
               "\n\t2. or entry or exit is inside where the graphic would be\n",
               file=stderr)
+    print(f"seed: {maze.seed}")
     print("=== A-Maze-ing ==="
           "\n\t1. Regenerate a new maze"
           "\n\t2. Show/Hide path from entry to exit"
