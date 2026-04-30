@@ -231,6 +231,7 @@ def generate_random_config() -> bool:
         returns True when default settings should be used,
          and False when a custom config file should be used
     """
+    go_again: str = ''
     x: str = input('Use default settings? (y/n)      ')
     if (x == 'y' or x == 'yes' or x == 'YES'):
         return True
@@ -266,7 +267,7 @@ def generate_random_config() -> bool:
             seed = random.randint(0, 999999999999999999)
             generate_seed_config(seed)
         else:
-            go_again: str = input(
+            go_again = input(
                                   'Could not understand your input,'
                                   'do you want to retry? (y/n)'
                                 )
