@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 import random
-from mazegen_il_lu.src.maze_class import Maze
-from mazegen_il_lu.src.viz import Viz, print_state, get_input
-from mazegen_il_lu.src.solve_maze import solve_maze
+from src.maze_class import Maze
+from src.viz import Viz, print_state, get_input
+from src.solve_maze import solve_maze
 
 
 def _produce_neighbors(maze: Maze, start: tuple) -> list[tuple]:

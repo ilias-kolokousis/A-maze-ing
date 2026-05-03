@@ -10,7 +10,7 @@ install: requirements.txt
 run: install
 	@. $(VENV)/bin/activate
 	@clear
-	@PYTHONPATH=$(shell dirname $(PWD)) $(PYTHON) a_maze_ing.py default_config.txt
+	@PYTHONPATH=$(PWD) $(PYTHON) a_maze_ing.py default_config.txt
 
 debug: install
 	@. $(VENV)/bin/activate
