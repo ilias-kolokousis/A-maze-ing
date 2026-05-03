@@ -2,10 +2,10 @@
 
 from pydantic import Field, BaseModel, model_validator
 import os
-from mazegen_il_lu.a_maze_ing import handle_errors
-from mazegen_il_lu.src.maze_class import Maze
-from mazegen_il_lu.src.prims import generate_prim
-from mazegen_il_lu.src.hunt_n_kill import generate_hunt_n_kill
+from a_maze_ing import handle_errors
+from src.maze_class import Maze
+from src.prims import generate_prim
+from src.hunt_n_kill import generate_hunt_n_kill
 
 
 class MazeGenerator(BaseModel):
@@ -40,7 +40,7 @@ class MazeGenerator(BaseModel):
             raise ValueError("Error: Values inside entry and exit must be "
                              f"between 0 and {self.width}"
                              " for the first value "
-                             "of entry and exit and"""
+                             "of entry and exit and"
                              f"between 0 and {self.height} "
                              "for the second value of entry and exit"
                              f"\nGot '{self.entry[0]}' and "
