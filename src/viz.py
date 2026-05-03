@@ -2,7 +2,7 @@
 
 from time import sleep
 from sys import stderr
-from mazegen_il_lu.src.maze_class import Maze
+from src.maze_class import Maze
 
 
 class Viz():
@@ -236,8 +236,8 @@ def get_input(maze: Maze, solution_rendered: bool = False) -> None:
     Args:
         maze (Maze): maze object
         solution_rendered (bool): checks if solution path is showing"""
-    from mazegen_il_lu.src.hunt_n_kill import generate_hunt_n_kill
-    from mazegen_il_lu.src.prims import generate_prim
+    from src.hunt_n_kill import generate_hunt_n_kill
+    from src.prims import generate_prim
 
     if maze.coords_42 is None:
         print("42 graphic has been omitted, because:"
@@ -245,7 +245,6 @@ def get_input(maze: Maze, solution_rendered: bool = False) -> None:
               " (needs to be at least 9x7)"
               "\n\t2. or entry or exit is inside where the graphic would be\n",
               file=stderr)
-    print(f"seed: {maze.seed}")
     print("=== A-Maze-ing ==="
           "\n\t1. Regenerate a new maze"
           "\n\t2. Show/Hide path from entry to exit"

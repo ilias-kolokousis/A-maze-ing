@@ -1,7 +1,7 @@
 seed=
-width=25
-height=25
-entry=5,0
-exit=20,24
+width=15
+height=15
+entry=0,0
+exit=10,10
 output_file=maze.txt
 perfect=false

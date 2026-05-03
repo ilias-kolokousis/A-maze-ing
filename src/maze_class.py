@@ -2,7 +2,7 @@
 
 import random
 from typing import Callable, TypeAlias
-from mazegen_il_lu.src.configuration import plot_42
+from src.configuration import plot_42
 
 BitOp: TypeAlias = Callable[[int], int]
 
